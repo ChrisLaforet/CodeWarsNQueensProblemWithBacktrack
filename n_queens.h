@@ -56,6 +56,10 @@ public:
 
     explicit board(int squaresPerSide, square *fixedQueenLocation) {
         prepareBoard(squaresPerSide);
+        if (fixedQueenLocation->getX() >= squaresPerSide ||
+            fixedQueenLocation->getY() >= squaresPerSide) {
+            throw std::exception("fixed queen location is out of bounds of the board");
+        }
         this->fixedQueenLocation = fixedQueenLocation;
     }
 
