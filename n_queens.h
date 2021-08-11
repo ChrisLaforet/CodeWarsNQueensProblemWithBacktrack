@@ -46,7 +46,7 @@ class board {
         if (x >= squaresPerSide || y >= squaresPerSide) {
             throw std::exception("out of range");
         }
-        squares[x][y] = value;
+        squares[y][x] = value;
     }
 
 public:
@@ -61,6 +61,7 @@ public:
             throw std::exception("fixed queen location is out of bounds of the board");
         }
         this->fixedQueenLocation = fixedQueenLocation;
+        flipSquareAt(fixedQueenLocation->getX(), fixedQueenLocation->getY(), true);
     }
 
     ~board() {
@@ -80,6 +81,17 @@ public:
 
     void removeQueenAt(int x, int y) {
         flipSquareAt(x, y, false);
+    }
+
+    std::string getPrintableRepresentation() {
+        std::string result;
+        for (int yIndex = 0; yIndex < squaresPerSide; yIndex++) {
+            for (int xIndex = 0; xIndex < squaresPerSide; xIndex++) {
+                result += squares[yIndex][xIndex] ? "Q" : ".";
+            }
+            result += "\n";
+        }
+        return result;
     }
 };
 
