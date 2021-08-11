@@ -9,23 +9,42 @@
 #include <string>
 
 class board {
-    int squares_per_side;
+    int squaresPerSide;
     bool** squares;
 
+    void flipSquareAt(int x, int y, bool value) {
+        if (x >= squaresPerSide || y >= squaresPerSide) {
+            throw std::exception("out of range");
+        }
+        squares[x][y] = value;
+    }
+
 public:
-    explicit board(int squares_per_side) {
-        this->squares_per_side = squares_per_side;
-        squares = new bool*[squares_per_side];
-        for (int index = 0; index < squares_per_side; index++) {
-            squares[index] = new bool[squares_per_side];
+    explicit board(int squaresPerSide) {
+        this->squaresPerSide = squaresPerSide;
+        squares = new bool*[squaresPerSide];
+        for (int index = 0; index < squaresPerSide; index++) {
+            squares[index] = new bool[squaresPerSide];
         }
     }
 
     ~board() {
-        for (int index = 0; index < squares_per_side; index++) {
+        for (int index = 0; index < squaresPerSide; index++) {
             delete [] squares[index];
         }
         delete [] squares;
+    }
+
+    int getSquaresPerSide() {
+        return squaresPerSide;
+    }
+
+    void setQueenAt(int x, int y) {
+        flipSquareAt(x, y, true);
+    }
+
+    void removeQueenAt(int x, int y) {
+        flipSquareAt(x, y, false);
     }
 };
 
@@ -40,11 +59,16 @@ public:
     ~n_queens() {
         delete currentBoard;
     }
-    friend n_queens *createNQueens(int squares_per_side);
+
+    board& getBoard() {
+        return *currentBoard;
+    }
+
+    friend n_queens *createNQueens(int squaredPerSide);
 };
 
 
-n_queens *createNQueens(int squares_per_side);
+n_queens *createNQueens(int squaredPerSide);
 
 std::string hello();
 

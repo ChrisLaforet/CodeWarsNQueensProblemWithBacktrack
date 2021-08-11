@@ -15,8 +15,11 @@ TEST(TDDTests, givenSizeLessThan4_whenCreatingBoard_thenReturnsNull) {
     ASSERT_TRUE(createNQueens(3) == nullptr);
 }
 
-
 TEST(TDDTests, givenSizeOf4_whenCreatingBoard_thenCreatesBoardSizeBySize) {
-    ASSERT_TRUE( createNQueens(4) != nullptr);
+    n_queens *solver = createNQueens(4);
+    ASSERT_TRUE( solver != nullptr);
+    board &board = solver->getBoard();
+    ASSERT_EQ(4, board.getSquaresPerSide());
+    delete solver;
 }
 
