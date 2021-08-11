@@ -69,6 +69,8 @@ public:
             delete [] squares[index];
         }
         delete [] squares;
+
+        delete fixedQueenLocation;
     }
 
     int getSquaresPerSide() {
