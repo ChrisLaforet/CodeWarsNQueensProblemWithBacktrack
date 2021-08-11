@@ -30,7 +30,7 @@ public:
 class board {
     int squaresPerSide;
     bool** squares;
-    square *fixedQueenLocation;
+    square *fixedQueenLocation = nullptr;
 
     void prepareBoard(int squaresPerSide) {
         if (squaresPerSide < 4)
@@ -117,10 +117,5 @@ public:
         return *currentBoard;
     }
 };
-
-
-n_queens *createNQueens(int squaresPerSide);
-
-std::string hello();
 
 #endif //CODEWARSNQUEENSPROBLEM_N_QUEENS_H

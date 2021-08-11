@@ -21,7 +21,7 @@ TEST(TDDTests, givenSizeLessThan4_whenCreatingBoard_thenFails) {
 }
 
 TEST(TDDTests, givenSizeOf4_whenCreatingBoard_thenCreatesBoardSizeBySize) {
-    n_queens *solver = new n_queens(4);
+    auto *solver = new n_queens(4);
     ASSERT_TRUE( solver != nullptr);
     board &board = solver->getBoard();
     ASSERT_EQ(4, board.getSquaresPerSide());
@@ -29,8 +29,8 @@ TEST(TDDTests, givenSizeOf4_whenCreatingBoard_thenCreatesBoardSizeBySize) {
 }
 
 TEST(TDDTests, givenSizeOf4AndAFixedQueenPositionInRange_whenCreatingBoard_thenFails) {
-    square *fixedQueenPosition = new square(1, 3);
-    n_queens *solver = new n_queens(4, fixedQueenPosition);
+    auto *fixedQueenPosition = new square(1, 3);
+    auto *solver = new n_queens(4, fixedQueenPosition);
     ASSERT_TRUE( solver != nullptr);
     board &board = solver->getBoard();
     ASSERT_EQ(4, board.getSquaresPerSide());
@@ -38,7 +38,7 @@ TEST(TDDTests, givenSizeOf4AndAFixedQueenPositionInRange_whenCreatingBoard_thenF
 }
 
 TEST(TDDTests, givenSizeOf4AndAFixedQueenPositionOutOfRange_whenCreatingBoard_thenCreatesBoardSizeBySize) {
-    square *fixedQueenPosition = new square(2, 4);
+    auto *fixedQueenPosition = new square(2, 4);
     try {
         new n_queens(4, fixedQueenPosition);
         FAIL();
