@@ -12,11 +12,16 @@ TEST(TDDTests, givenNothing_whenTrueConstant_thenAssertsTrue) {
 }
 
 TEST(TDDTests, givenSizeLessThan4_whenCreatingBoard_thenReturnsNull) {
-    ASSERT_TRUE(createNQueens(3) == nullptr);
+    try {
+        new n_queens(3);
+        FAIL();
+    } catch (std::exception &ex) {
+        ASSERT_TRUE( true);
+    }
 }
 
 TEST(TDDTests, givenSizeOf4_whenCreatingBoard_thenCreatesBoardSizeBySize) {
-    n_queens *solver = createNQueens(4);
+    n_queens *solver = new n_queens(4);
     ASSERT_TRUE( solver != nullptr);
     board &board = solver->getBoard();
     ASSERT_EQ(4, board.getSquaresPerSide());

@@ -8,9 +8,39 @@
 
 #include <string>
 
+class square {
+    int x;
+    int y;
+
+public:
+    square(int x, int y) {
+        this->x = x;
+        this->y = y;
+    }
+
+    int getX() {
+        return x;
+    }
+
+    int getY() {
+        return y;
+    }
+};
+
 class board {
     int squaresPerSide;
     bool** squares;
+    square *fixedQueenLocation;
+
+    void prepareBoard(int squaresPerSide) {
+        if (squaresPerSide < 4)
+            throw std::exception("board size less than 4 per side");
+        this->squaresPerSide = squaresPerSide;
+        squares = new bool*[squaresPerSide];
+        for (int index = 0; index < squaresPerSide; index++) {
+            squares[index] = new bool[squaresPerSide];
+        }
+    }
 
     void flipSquareAt(int x, int y, bool value) {
         if (x >= squaresPerSide || y >= squaresPerSide) {
@@ -21,11 +51,12 @@ class board {
 
 public:
     explicit board(int squaresPerSide) {
-        this->squaresPerSide = squaresPerSide;
-        squares = new bool*[squaresPerSide];
-        for (int index = 0; index < squaresPerSide; index++) {
-            squares[index] = new bool[squaresPerSide];
-        }
+        prepareBoard(squaresPerSide);
+    }
+
+    explicit board(int squaresPerSide, square *fixedQueenLocation) {
+        prepareBoard(squaresPerSide);
+        this->fixedQueenLocation = fixedQueenLocation;
     }
 
     ~board() {
@@ -51,11 +82,11 @@ public:
 class n_queens {
     board *currentBoard;
 
+public:
     explicit n_queens(int squares_per_side){
         this->currentBoard = new board(squares_per_side);
     }
 
-public:
     ~n_queens() {
         delete currentBoard;
     }
@@ -63,12 +94,10 @@ public:
     board& getBoard() {
         return *currentBoard;
     }
-
-    friend n_queens *createNQueens(int squaredPerSide);
 };
 
 
-n_queens *createNQueens(int squaredPerSide);
+n_queens *createNQueens(int squaresPerSide);
 
 std::string hello();
 

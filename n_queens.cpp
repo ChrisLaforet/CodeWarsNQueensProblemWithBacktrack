@@ -6,7 +6,5 @@ std::string hello() {
 }
 
 n_queens *createNQueens(int squaredPerSide) {
-    if (squaredPerSide >= 4)
-        return new n_queens(squaredPerSide);
-    return nullptr;
+    return new n_queens(squaredPerSide);
 }
