@@ -34,7 +34,7 @@ class board {
 
     void prepareBoard(int squaresPerSide) {
         if (squaresPerSide < 4)
-            throw std::exception("board size less than 4 per side");
+            throw std::exception("board size cannot be smaller than 4 per side");
         this->squaresPerSide = squaresPerSide;
         squares = new bool*[squaresPerSide];
         for (int index = 0; index < squaresPerSide; index++) {
@@ -83,8 +83,12 @@ class n_queens {
     board *currentBoard;
 
 public:
-    explicit n_queens(int squares_per_side){
-        this->currentBoard = new board(squares_per_side);
+    explicit n_queens(int squaresPerSide){
+        this->currentBoard = new board(squaresPerSide);
+    }
+    
+    explicit n_queens(int squaresPerSide, square *fixedQueenPosition)  {
+        this->currentBoard = new board(squaresPerSide, fixedQueenPosition);
     }
 
     ~n_queens() {
