@@ -6,6 +6,11 @@
 //    return 0;
 //}
 
-TEST(GTTest, SimpleAssert) {
+TEST(TDDTests, givenNothing_whenTrueConstant_thenAssertsTrue) {
     ASSERT_TRUE(true);
 }
+
+TEST(TDDTests, givenSize_whenCreatingBoard_thenCreatesBoardSizeBySize) {
+
+}
+
