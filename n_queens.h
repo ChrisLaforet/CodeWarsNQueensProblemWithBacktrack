@@ -28,8 +28,8 @@ public:
 };
 
 class board {
-    int squaresPerSide;
-    bool** squares;
+    int squaresPerSide = 0;
+    bool** squares = nullptr;
     square *fixedQueenLocation = nullptr;
 
     void prepareBoard(int squaresPerSide) {
