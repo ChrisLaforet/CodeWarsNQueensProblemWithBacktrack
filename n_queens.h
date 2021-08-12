@@ -95,7 +95,7 @@ class board {
     }
 
     bool rightPressureOn(int x, int y) {
-        if (x < 0 || x < (squaresPerSide - 1))
+        if (x < 0 || x >= (squaresPerSide - 1))
             return false;
         for (int xIndex = x + 1; x < squaresPerSide; x++) {
             if (isQueenAt(xIndex, y)) {
@@ -108,7 +108,7 @@ class board {
     bool topLeftPressureOn(int x, int y) {
         if (x <= 0 || x >= squaresPerSide)
             return false;
-        if (y <= 0 || y >= squaresPerSide)
+        if (y <= 0 || y >= (squaresPerSide - 1))
             return false;
         for (int xIndex = x - 1, yIndex = y - 1; x >= 0, y >= 0; x--, y--) {
             if (isQueenAt(xIndex, yIndex)) {
@@ -121,7 +121,7 @@ class board {
     bool bottomLeftPressureOn(int x, int y) {
         if (x <= 0 || x >= squaresPerSide)
             return false;
-        if (y < 0 || y < (squaresPerSide - 1))
+        if (y < 0 || y >= (squaresPerSide - 1))
             return false;
         for (int xIndex = x - 1, yIndex = y + 1; x >= 0, y < squaresPerSide; x--, y++) {
             if (isQueenAt(xIndex, yIndex)) {
@@ -132,9 +132,9 @@ class board {
     }
 
     bool topRightPressureOn(int x, int y) {
-        if (x <= 0 || x >= squaresPerSide)
+        if (x < 0 || x >= (squaresPerSide - 1))
             return false;
-        if (y < 0 || y < (squaresPerSide - 1))
+        if (y <= 0 || y >= (squaresPerSide - 1))
             return false;
         for (int xIndex = x + 1, yIndex = y + 1; x < squaresPerSide, y < squaresPerSide; x++, y++) {
             if (isQueenAt(xIndex, yIndex)) {
@@ -145,9 +145,9 @@ class board {
     }
 
     bool bottomRightPressureOn(int x, int y) {
-        if (x < 0 || x < (squaresPerSide - 1))
+        if (x < 0 || x >= (squaresPerSide - 1))
             return false;
-        if (y < 0 || y < (squaresPerSide - 1))
+        if (y < 0 || y >= (squaresPerSide - 1))
             return false;
         for (int xIndex = x + 1, yIndex = y + 1; x < squaresPerSide, y < squaresPerSide; x++, y++) {
             if (isQueenAt(xIndex, yIndex)) {
