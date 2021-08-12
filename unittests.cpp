@@ -47,3 +47,15 @@ TEST(TDDTests, givenSizeOf4AndAFixedQueenPositionOutOfRange_whenCreatingBoard_th
     }
 }
 
+TEST(TDDTests, givenBoardSize8_whenPlacing2QueensOnSameRow_thenReturnsPressureOf1OnTargetQueen) {
+    auto *fixedQueenPosition = new square(2, 4);
+    try {
+        new n_queens(4, fixedQueenPosition);
+        FAIL();
+    } catch (std::exception &ex) {
+        ASSERT_TRUE( true);
+    }
+}
+
+
+

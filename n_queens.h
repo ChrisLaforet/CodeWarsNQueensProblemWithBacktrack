@@ -9,47 +9,85 @@
 #include <string>
 
 class square {
-    int x;
-    int y;
+    int column;
+    int row;
 
 public:
-    square(int x, int y) {
-        this->x = x;
-        this->y = y;
+    square(int column, int row) {
+        this->column = column;
+        this->row = row;
     }
 
-    int getX() {
-        return x;
+    int getColumn() {
+        return column;
     }
 
-    int getY() {
-        return y;
+    int getRow() {
+        return row;
     }
 };
 
+
+class iBoard {
+public:
+    virtual int getSquaresPerSide() = 0;
+    virtual bool isQueenAt(int column, int row) = 0;
+};
+
+class iColumn_weights {
+public:
+    virtual void setWeightFor(int row, int totalWeight) = 0;
+};
+
+class column_weights;
+
 class square_weight {
-    int x;
-    int y;
+    int column;
+    int row;
     bool hasQueen = false;
     int weight = 0;
 
+    friend class column_weights;
+
+protected:
+    explicit square_weight() {
+        this->column = 0;
+        this->row = 0;
+    }
+
+    void setColumn(int column) {
+        this->column = column;
+    }
+
+    void setRow(int row) {
+        this->row = row;
+    }
+
+    void setQueenOnSquare() {
+        this->hasQueen = true;
+    }
+
 public:
-    explicit square_weight(int x, int y, bool hasQueen) {
-        this->x = x;
-        this->y = y;
+    explicit square_weight(int column, int row, bool hasQueen) {
+        this->column = column;
+        this->row = row;
         this->hasQueen = hasQueen;
     }
 
-    int getX() {
-        return x;
+    int getColumn() {
+        return column;
     }
 
-    int getY() {
-        return y;
+    int getRow() {
+        return row;
     }
 
-    bool isQueenSquare() {
+    bool isQueenOnSquare() {
         return hasQueen;
+    }
+
+    void setWeight(int totalWeight) {
+        weight = totalWeight;
     }
 
     void addWeight() {
@@ -61,9 +99,9 @@ public:
     }
 };
 
-class board {
+class board : public iBoard {
     int squaresPerSide = 0;
-    bool** squares = nullptr;
+    bool** squares = nullptr;       // column dimensions containing row dimensions [column][row]
     square *fixedQueenLocation = nullptr;
 
     void prepareBoard(int squaresPerSide) {
@@ -71,91 +109,115 @@ class board {
             throw std::exception("board size cannot be smaller than 4 per side");
         this->squaresPerSide = squaresPerSide;
         squares = new bool*[squaresPerSide];
-        for (int index = 0; index < squaresPerSide; index++) {
-            squares[index] = new bool[squaresPerSide];
+        for (int column = 0; column < squaresPerSide; column++) {
+            squares[column] = new bool[squaresPerSide];
         }
     }
 
-    void flipSquareAt(int x, int y, bool value) {
-        if (x >= squaresPerSide || y >= squaresPerSide) {
+    void flipSquareAt(int column, int row, bool value) {
+        if (column >= squaresPerSide || row >= squaresPerSide) {
             throw std::exception("out of range");
         }
-        squares[y][x] = value;
+        squares[column][row] = value;
     }
 
-    bool leftPressureOn(int x, int y) {
-        if (x <= 0 || x >= squaresPerSide)
+    bool leftPressureOn(int column, int row) {
+        if (column <= 0 || column >= squaresPerSide)
             return false;
-        for (int xIndex = x - 1; x >= 0; x--) {
-            if (isQueenAt(xIndex, y)) {
+        for (int index = column - 1; column >= 0; column--) {
+            if (isQueenAt(index, row)) {
                 return true;
             }
         }
         return false;
     }
 
-    bool rightPressureOn(int x, int y) {
-        if (x < 0 || x >= (squaresPerSide - 1))
+    bool rightPressureOn(int column, int row) {
+        if (column < 0 || column >= (squaresPerSide - 1))
             return false;
-        for (int xIndex = x + 1; x < squaresPerSide; x++) {
-            if (isQueenAt(xIndex, y)) {
+        for (int index = column + 1; column < squaresPerSide; column++) {
+            if (isQueenAt(index, row)) {
                 return true;
             }
         }
         return false;
     }
 
-    bool topLeftPressureOn(int x, int y) {
-        if (x <= 0 || x >= squaresPerSide)
+    bool topPressureOn(int column, int row) {
+        if (row <= 0 || row >= squaresPerSide)
             return false;
-        if (y <= 0 || y >= (squaresPerSide - 1))
-            return false;
-        for (int xIndex = x - 1, yIndex = y - 1; x >= 0, y >= 0; x--, y--) {
-            if (isQueenAt(xIndex, yIndex)) {
+        for (int index = row - 1; row >= 0; row--) {
+            if (isQueenAt(column, index)) {
                 return true;
             }
         }
         return false;
     }
 
-    bool bottomLeftPressureOn(int x, int y) {
-        if (x <= 0 || x >= squaresPerSide)
+    bool bottomPressureOn(int column, int row) {
+        if (row < 0 || row >= (squaresPerSide - 1))
             return false;
-        if (y < 0 || y >= (squaresPerSide - 1))
-            return false;
-        for (int xIndex = x - 1, yIndex = y + 1; x >= 0, y < squaresPerSide; x--, y++) {
-            if (isQueenAt(xIndex, yIndex)) {
+        for (int index = row + 1; row < squaresPerSide; row++) {
+            if (isQueenAt(column, index)) {
                 return true;
             }
         }
         return false;
     }
 
-    bool topRightPressureOn(int x, int y) {
-        if (x < 0 || x >= (squaresPerSide - 1))
+    bool topLeftPressureOn(int column, int row) {
+        if (column <= 0 || column >= squaresPerSide)
             return false;
-        if (y <= 0 || y >= (squaresPerSide - 1))
+        if (row <= 0 || row >= (squaresPerSide - 1))
             return false;
-        for (int xIndex = x + 1, yIndex = y + 1; x < squaresPerSide, y < squaresPerSide; x++, y++) {
-            if (isQueenAt(xIndex, yIndex)) {
+        for (int cIndex = column - 1, rIndex = column - 1; cIndex >= 0 && rIndex >= 0; cIndex--, rIndex--) {
+            if (isQueenAt(cIndex, rIndex)) {
                 return true;
             }
         }
         return false;
     }
 
-    bool bottomRightPressureOn(int x, int y) {
-        if (x < 0 || x >= (squaresPerSide - 1))
+    bool bottomLeftPressureOn(int column, int row) {
+        if (column <= 0 || column >= squaresPerSide)
             return false;
-        if (y < 0 || y >= (squaresPerSide - 1))
+        if (row < 0 || row >= (squaresPerSide - 1))
             return false;
-        for (int xIndex = x + 1, yIndex = y + 1; x < squaresPerSide, y < squaresPerSide; x++, y++) {
-            if (isQueenAt(xIndex, yIndex)) {
+        for (int cIndex = column - 1, rIndex = row + 1; cIndex >= 0 && rIndex < squaresPerSide; cIndex--, rIndex++) {
+            if (isQueenAt(cIndex, rIndex)) {
                 return true;
             }
         }
         return false;
     }
+
+    bool topRightPressureOn(int column, int row) {
+        if (column < 0 || column >= (squaresPerSide - 1))
+            return false;
+        if (row <= 0 || row >= squaresPerSide)
+            return false;
+        for (int cIndex = column + 1, rIndex = row - 1; cIndex < squaresPerSide && rIndex >= 0; cIndex++, rIndex--) {
+            if (isQueenAt(cIndex, rIndex)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    bool bottomRightPressureOn(int column, int row) {
+        if (column < 0 || column >= (squaresPerSide - 1))
+            return false;
+        if (row < 0 || row >= (squaresPerSide - 1))
+            return false;
+        for (int cIndex = column + 1, rIndex = row + 1; cIndex < squaresPerSide && rIndex < squaresPerSide; cIndex++, rIndex++) {
+            if (isQueenAt(cIndex, rIndex)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    iColumn_weights *createColumnWeights(iBoard *board, int column);
 
 public:
     explicit board(int squaresPerSide) {
@@ -164,12 +226,12 @@ public:
 
     explicit board(int squaresPerSide, square *fixedQueenLocation) {
         prepareBoard(squaresPerSide);
-        if (fixedQueenLocation->getX() >= squaresPerSide ||
-            fixedQueenLocation->getY() >= squaresPerSide) {
+        if (fixedQueenLocation->getColumn() >= squaresPerSide ||
+                fixedQueenLocation->getRow() >= squaresPerSide) {
             throw std::exception("fixed queen location is out of bounds of the board");
         }
         this->fixedQueenLocation = fixedQueenLocation;
-        flipSquareAt(fixedQueenLocation->getX(), fixedQueenLocation->getY(), true);
+        flipSquareAt(fixedQueenLocation->getColumn(), fixedQueenLocation->getRow(), true);
     }
 
     ~board() {
@@ -181,59 +243,100 @@ public:
         delete fixedQueenLocation;
     }
 
-    int getSquaresPerSide() {
+    int getSquaresPerSide() override {
         return squaresPerSide;
     }
 
-    void setQueenAt(int x, int y) {
-        flipSquareAt(x, y, true);
+    void setQueenAt(int column, int row) {
+        flipSquareAt(column, row,true);
     }
 
-    void removeQueenAt(int x, int y) {
-        flipSquareAt(x, y, false);
+    void removeQueenAt(int column, int row) {
+        flipSquareAt(column, row,false);
     }
 
-    bool isQueenAt(int x, int y) {
-        return squares[y][x];
+    bool isQueenAt(int column, int row) override {
+        return squares[column][row];
     }
 
     std::string getPrintableRepresentation() {
         std::string result;
-        for (int yIndex = 0; yIndex < squaresPerSide; yIndex++) {
-            for (int xIndex = 0; xIndex < squaresPerSide; xIndex++) {
-                result += squares[yIndex][xIndex] ? "Q" : ".";
+        for (int row = 0; row < squaresPerSide; row++) {
+            for (int column = 0; column < squaresPerSide; column++) {
+                result += squares[row][column] ? "Q" : ".";
             }
             result += "\n";
         }
         return result;
     }
 
-    square_weight **getWeights(int x) {
-        square_weight **weights = new square_weight *[squaresPerSide];
-        for (int yIndex = 0; yIndex < squaresPerSide; yIndex++) {
-            weights[yIndex] = new square_weight(x, yIndex, isQueenAt(x, yIndex));
-            if (leftPressureOn(x, yIndex)) {
-                weights[yIndex]->addWeight();
+    column_weights *getWeights(int column) {
+        iColumn_weights *weights = createColumnWeights((iBoard *)this, column);
+        for (int row = 0; row < squaresPerSide; row++) {
+            int totalWeight = 0;
+            if (leftPressureOn(column, row)) {
+                ++totalWeight;
             }
-            if (rightPressureOn(x, yIndex)) {
-                weights[yIndex]->addWeight();
+            if (rightPressureOn(column, row)) {
+                ++totalWeight;
             }
-            if (topLeftPressureOn(x, yIndex)) {
-                weights[yIndex]->addWeight();
+            if (topPressureOn(column, row)) {
+                ++totalWeight;
             }
-            if (bottomLeftPressureOn(x, yIndex)) {
-                weights[yIndex]->addWeight();
+            if (bottomPressureOn(column, row)) {
+                ++totalWeight;
             }
-            if (topRightPressureOn(x, yIndex)) {
-                weights[yIndex]->addWeight();
+            if (topLeftPressureOn(column, row)) {
+                ++totalWeight;
             }
-            if (bottomRightPressureOn(x, yIndex)) {
-                weights[yIndex]->addWeight();
+            if (bottomLeftPressureOn(column, row)) {
+                ++totalWeight;
             }
+            if (topRightPressureOn(column, row)) {
+                ++totalWeight;
+            }
+            if (bottomRightPressureOn(column, row)) {
+                ++totalWeight;
+            }
+            weights->setWeightFor(row, totalWeight);
         }
-        return weights;
+        return (column_weights *)weights;
     }
 };
+
+class column_weights : public iColumn_weights {
+    square_weight *weights = nullptr;
+    int rows;
+    int column;
+
+public:
+    column_weights(iBoard *board, int column) {
+        rows = board->getSquaresPerSide();
+        this->column = column;
+        weights = new square_weight[rows];
+        for (int row = 0; row < rows; row++) {
+            weights[row].setColumn(column);
+            weights[row].setRow(row);
+            if (board->isQueenAt(column, row)) {
+                weights[row].setQueenOnSquare();
+            }
+        }
+    }
+    ~column_weights() {
+        delete [] weights;
+    }
+
+    void setWeightFor(int row, int totalWeight) override {
+        if (row >= rows) {
+            throw std::exception("illegal row in column weights");
+        }
+        weights[row].setWeight(totalWeight);
+    }
+};
+
+iColumn_weights *board::createColumnWeights(iBoard *board, int column) {
+    return new column_weights(board, column);
+}
 
 class n_queens {
     board *currentBoard;
