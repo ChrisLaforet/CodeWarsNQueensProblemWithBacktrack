@@ -49,12 +49,12 @@ TEST(TDDTests, givenSizeOf4AndAFixedQueenPositionOutOfRange_whenCreatingBoard_th
 
 TEST(TDDTests, givenBoardSize8_whenPlacing2QueensOnSameRow_thenReturnsPressureOf1OnTargetQueen) {
     auto *fixedQueenPosition = new square(2, 4);
-    try {
-        new n_queens(4, fixedQueenPosition);
-        FAIL();
-    } catch (std::exception &ex) {
-        ASSERT_TRUE( true);
-    }
+    auto *newQueenPosition = new square(4, 4);
+    auto *sut = new n_queens(8, fixedQueenPosition);
+    auto board = sut->getBoard();
+    board.setQueenAt(newQueenPosition->getColumn(), newQueenPosition->getRow());
+    auto *weights = board.getWeights(4);
+    ASSERT_EQ(1, weights->getWeightFor(4));
 }
 
 

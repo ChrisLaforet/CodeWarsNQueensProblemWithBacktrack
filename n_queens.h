@@ -111,6 +111,9 @@ class board : public iBoard {
         squares = new bool*[squaresPerSide];
         for (int column = 0; column < squaresPerSide; column++) {
             squares[column] = new bool[squaresPerSide];
+            for (int row = 0; row < squaresPerSide; row++) {
+                squares[column][row] = false;
+            }
         }
     }
 
@@ -122,9 +125,12 @@ class board : public iBoard {
     }
 
     bool leftPressureOn(int column, int row) {
+if (row == 4) {
+    std::cout << std::endl;
+}
         if (column <= 0 || column >= squaresPerSide)
             return false;
-        for (int index = column - 1; column >= 0; column--) {
+        for (int index = column - 1; index >= 0; index--) {
             if (isQueenAt(index, row)) {
                 return true;
             }
@@ -135,7 +141,7 @@ class board : public iBoard {
     bool rightPressureOn(int column, int row) {
         if (column < 0 || column >= (squaresPerSide - 1))
             return false;
-        for (int index = column + 1; column < squaresPerSide; column++) {
+        for (int index = column + 1; index < squaresPerSide; index++) {
             if (isQueenAt(index, row)) {
                 return true;
             }
@@ -146,7 +152,7 @@ class board : public iBoard {
     bool topPressureOn(int column, int row) {
         if (row <= 0 || row >= squaresPerSide)
             return false;
-        for (int index = row - 1; row >= 0; row--) {
+        for (int index = row - 1; index >= 0; index--) {
             if (isQueenAt(column, index)) {
                 return true;
             }
@@ -157,7 +163,7 @@ class board : public iBoard {
     bool bottomPressureOn(int column, int row) {
         if (row < 0 || row >= (squaresPerSide - 1))
             return false;
-        for (int index = row + 1; row < squaresPerSide; row++) {
+        for (int index = row + 1; index < squaresPerSide; index++) {
             if (isQueenAt(column, index)) {
                 return true;
             }
@@ -263,7 +269,7 @@ public:
         std::string result;
         for (int row = 0; row < squaresPerSide; row++) {
             for (int column = 0; column < squaresPerSide; column++) {
-                result += squares[row][column] ? "Q" : ".";
+                result += squares[column][row] ? "Q" : ".";
             }
             result += "\n";
         }
@@ -274,29 +280,31 @@ public:
         iColumn_weights *weights = createColumnWeights((iBoard *)this, column);
         for (int row = 0; row < squaresPerSide; row++) {
             int totalWeight = 0;
-            if (leftPressureOn(column, row)) {
-                ++totalWeight;
-            }
-            if (rightPressureOn(column, row)) {
-                ++totalWeight;
-            }
-            if (topPressureOn(column, row)) {
-                ++totalWeight;
-            }
-            if (bottomPressureOn(column, row)) {
-                ++totalWeight;
-            }
-            if (topLeftPressureOn(column, row)) {
-                ++totalWeight;
-            }
-            if (bottomLeftPressureOn(column, row)) {
-                ++totalWeight;
-            }
-            if (topRightPressureOn(column, row)) {
-                ++totalWeight;
-            }
-            if (bottomRightPressureOn(column, row)) {
-                ++totalWeight;
+            if (isQueenAt(column, row)) {
+                if (leftPressureOn(column, row)) {
+                    ++totalWeight;
+                }
+                if (rightPressureOn(column, row)) {
+                    ++totalWeight;
+                }
+                if (topPressureOn(column, row)) {
+                    ++totalWeight;
+                }
+                if (bottomPressureOn(column, row)) {
+                    ++totalWeight;
+                }
+                if (topLeftPressureOn(column, row)) {
+                    ++totalWeight;
+                }
+                if (bottomLeftPressureOn(column, row)) {
+                    ++totalWeight;
+                }
+                if (topRightPressureOn(column, row)) {
+                    ++totalWeight;
+                }
+                if (bottomRightPressureOn(column, row)) {
+                    ++totalWeight;
+                }
             }
             weights->setWeightFor(row, totalWeight);
         }
@@ -331,6 +339,10 @@ public:
             throw std::exception("illegal row in column weights");
         }
         weights[row].setWeight(totalWeight);
+    }
+
+    int getWeightFor(int row) {
+        return weights[row].getWeight();
     }
 };
 
