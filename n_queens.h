@@ -280,31 +280,29 @@ public:
         iColumn_weights *weights = createColumnWeights((iBoard *)this, column);
         for (int row = 0; row < squaresPerSide; row++) {
             int totalWeight = 0;
-            if (isQueenAt(column, row)) {
-                if (leftPressureOn(column, row)) {
-                    ++totalWeight;
-                }
-                if (rightPressureOn(column, row)) {
-                    ++totalWeight;
-                }
-                if (topPressureOn(column, row)) {
-                    ++totalWeight;
-                }
-                if (bottomPressureOn(column, row)) {
-                    ++totalWeight;
-                }
-                if (topLeftPressureOn(column, row)) {
-                    ++totalWeight;
-                }
-                if (bottomLeftPressureOn(column, row)) {
-                    ++totalWeight;
-                }
-                if (topRightPressureOn(column, row)) {
-                    ++totalWeight;
-                }
-                if (bottomRightPressureOn(column, row)) {
-                    ++totalWeight;
-                }
+            if (leftPressureOn(column, row)) {
+                ++totalWeight;
+            }
+            if (rightPressureOn(column, row)) {
+                ++totalWeight;
+            }
+            if (topPressureOn(column, row)) {
+                ++totalWeight;
+            }
+            if (bottomPressureOn(column, row)) {
+                ++totalWeight;
+            }
+            if (topLeftPressureOn(column, row)) {
+                ++totalWeight;
+            }
+            if (bottomLeftPressureOn(column, row)) {
+                ++totalWeight;
+            }
+            if (topRightPressureOn(column, row)) {
+                ++totalWeight;
+            }
+            if (bottomRightPressureOn(column, row)) {
+                ++totalWeight;
             }
             weights->setWeightFor(row, totalWeight);
         }
