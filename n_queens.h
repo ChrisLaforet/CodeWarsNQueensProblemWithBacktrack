@@ -169,9 +169,9 @@ class board : public iBoard {
     }
 
     bool topLeftPressureOn(int column, int row) {
-        if (column <= 0 || column >= squaresPerSide)
+        if (column <= 0 || column > squaresPerSide)
             return false;
-        if (row <= 0 || row >= (squaresPerSide - 1))
+        if (row <= 0 || row > (squaresPerSide - 1))
             return false;
         for (int cIndex = column - 1, rIndex = row - 1; cIndex >= 0 && rIndex >= 0; cIndex--, rIndex--) {
             if (isQueenAt(cIndex, rIndex)) {
@@ -182,7 +182,7 @@ class board : public iBoard {
     }
 
     bool bottomLeftPressureOn(int column, int row) {
-        if (column <= 0 || column >= squaresPerSide)
+        if (column <= 0 || column > squaresPerSide)
             return false;
         if (row < 0 || row >= (squaresPerSide - 1))
             return false;
@@ -411,7 +411,8 @@ bool solveColumn(board& board, int *columnNumbers, int columnCount, int columnOf
             continue;
         }
         board.setQueenAt(column, row);
-        if (columnOffset == (columnCount - 1)) {
+        if (columnOffset == columnCount) {
+//        if (columnOffset == (columnCount - 1)) {
             isSuccess = true;
             break;
         } else if (solveColumn(board, columnNumbers, columnCount, columnOffset + 1)) {
