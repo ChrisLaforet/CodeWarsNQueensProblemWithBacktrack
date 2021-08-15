@@ -55,5 +55,18 @@ TEST(TDDTests, givenBoardSize8_whenPlacing2QueensOnSameRow_thenReturnsPressureOf
     ASSERT_EQ(1, weights->getWeightFor(4));
 }
 
+TEST(TDDTests, givenBoardSize8_whenPlacingQueen_thenReturnsRowsWithoutQueen) {
+    auto *fixedQueenPosition = new square(2, 4);
+    auto *sut = new n_queens(8, fixedQueenPosition);
+    auto board = sut->getBoard();
+    int columnCount = 0;
+    auto columns = board.getColumnsWithoutQueens(columnCount);
+    ASSERT_EQ(7, columnCount);
+}
+
+TEST(TDDTests, givenBoardSize4WithPlacedQueen_whenSolvingProblem_thenReturnsSolutionString) {
+    auto returnValue = solveNQueens(4, {1, 0});
+    ASSERT_TRUE(returnValue.length() > 0);
+}
 
 
