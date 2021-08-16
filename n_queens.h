@@ -238,12 +238,11 @@ public:
     }
 
     virtual ~board() {
-        for (int index = 0; index < squaresPerSide; index++) {
-            delete [] squares[index];
-        }
         delete [] squares;
+        squares = nullptr;
 
         delete fixedQueenLocation;
+        fixedQueenLocation = nullptr;
     }
 
     int getSquaresPerSide() override {
@@ -363,6 +362,7 @@ public:
     }
     virtual ~column_weights() {
         delete [] weights;
+        weights = nullptr;
     }
 
     void setWeightFor(int row, int totalWeight) override {
@@ -395,6 +395,7 @@ public:
 
     ~n_queens() {
         delete currentBoard;
+        currentBoard = nullptr;
     }
 
     board& getBoard() {
@@ -422,6 +423,7 @@ bool solveColumn(board& board, int *columnNumbers, int columnCount, int columnOf
         board.removeQueenAt(column, row);
     }
     delete weights;
+    weights = nullptr;
     return isSuccess;
 }
 
@@ -442,6 +444,7 @@ std::string solveNQueens(int n, std::pair<int, int> mandatoryQueenCoordinates) {
         returnValue = board.getPrintableRepresentation();
     }
     delete queenSolver;
+    queenSolver = nullptr;
     return returnValue;
 }
 
