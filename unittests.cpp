@@ -2,10 +2,15 @@
 #include <gtest/gtest.h>
 #include "n_queens.h"
 
-//int main() {
-//    std::cout << "Hello, World!" << std::endl;
-//    return 0;
-//}
+#if 0
+int main() {
+    _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+    auto returnValue = solveNQueens(4, {1, 0});
+    std::cout << "Hello, World!" << std::endl;
+    std::cout << "Result is: " << returnValue << std::endl;
+    return 0;
+}
+#endif
 
 TEST(TDDTests, givenNothing_whenTrueConstant_thenAssertsTrue) {
     ASSERT_TRUE(true);
@@ -68,5 +73,4 @@ TEST(TDDTests, givenBoardSize4WithPlacedQueen_whenSolvingProblem_thenReturnsSolu
     auto returnValue = solveNQueens(4, {1, 0});
     ASSERT_TRUE(returnValue.length() > 0);
 }
-
 

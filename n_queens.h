@@ -7,6 +7,7 @@
 
 
 #include <string>
+#include <cstring>
 
 class square {
     int column;
@@ -238,11 +239,9 @@ public:
     }
 
     virtual ~board() {
-        delete [] squares;
-        squares = nullptr;
+    //    delete [] squares;
 
-        delete fixedQueenLocation;
-        fixedQueenLocation = nullptr;
+    //    delete fixedQueenLocation;
     }
 
     int getSquaresPerSide() override {
@@ -338,6 +337,9 @@ public:
                 openColumns[offset++] = column;
             }
         }
+//        for (int count = 0; count < columns; count++) {
+//            std::cerr << "At " << count << " - " << openColumns[count] << std::endl;
+//        }
         return openColumns;
     }
 };
@@ -412,8 +414,8 @@ bool solveColumn(board& board, int *columnNumbers, int columnCount, int columnOf
             continue;
         }
         board.setQueenAt(column, row);
-        if (columnOffset == columnCount) {
-//        if (columnOffset == (columnCount - 1)) {
+//        if (columnOffset == columnCount) {
+        if (columnOffset >= (columnCount - 1)) {
             isSuccess = true;
             break;
         } else if (solveColumn(board, columnNumbers, columnCount, columnOffset + 1)) {
@@ -422,12 +424,34 @@ bool solveColumn(board& board, int *columnNumbers, int columnCount, int columnOf
         }
         board.removeQueenAt(column, row);
     }
+
     delete weights;
     weights = nullptr;
     return isSuccess;
 }
 
+std::string mapInvalidSize(int n, std::pair<int, int> mandatoryQueenCoordinates) {
+    char buffer[100];
+    buffer[0] = '\0';
+    for (int row = 0; row < n; row++) {
+        for (int column = 0; column < n; column++) {
+            if (mandatoryQueenCoordinates.first == column &&
+                mandatoryQueenCoordinates.second == row) {
+                strcat(buffer, "Q");
+            } else {
+                strcat(buffer,".");
+            }
+        }
+        strcat(buffer, "\n");
+    }
+    std::string *retval = new std::string(buffer);
+    return *retval;
+}
+
 std::string solveNQueens(int n, std::pair<int, int> mandatoryQueenCoordinates) {
+    if (n == 1) {
+        return "Q\n";
+    }
     if (n < 4) {
         return "";
     }
@@ -439,13 +463,16 @@ std::string solveNQueens(int n, std::pair<int, int> mandatoryQueenCoordinates) {
     int columnCount = 0;
     auto columns = board.getColumnsWithoutQueens(columnCount);
 
-    std::string returnValue;
+    std::string *returnValue;
     if (solveColumn(board, columns, columnCount, 0)) {
-        returnValue = board.getPrintableRepresentation();
+        std::string solution = board.getPrintableRepresentation();
+        returnValue = new std::string(solution);
     }
+    delete columns;
+
     delete queenSolver;
-    queenSolver = nullptr;
-    return returnValue;
+    //queenSolver = nullptr;
+    return *returnValue;
 }
 
 #endif //CODEWARSNQUEENSPROBLEM_N_QUEENS_H
