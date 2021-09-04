@@ -52,13 +52,13 @@ TEST(TDDTests, givenSizeOf4AndAFixedQueenPositionOutOfRange_whenCreatingBoard_th
     }
 }
 
-TEST(TDDTests, givenBoardSize8_whenPlacing2QueensOnSameRow_thenReturnsPressureOf1OnTargetQueen) {
-    auto *fixedQueenPosition = new square(2, 4);
-    auto *sut = new n_queens(8, fixedQueenPosition);
-    auto board = sut->getBoard();
-    auto *weights = board.getWeights(4);
-    ASSERT_EQ(1, weights->getWeightFor(4));
-}
+//TEST(TDDTests, givenBoardSize8_whenPlacing2QueensOnSameRow_thenReturnsPressureOf1OnTargetQueen) {
+//    auto *fixedQueenPosition = new square(2, 4);
+//    auto *sut = new n_queens(8, fixedQueenPosition);
+//    auto board = sut->getBoard();
+//    auto *weights = board.getWeights(4);
+//    ASSERT_EQ(1, weights->getWeightFor(4));
+//}
 
 TEST(TDDTests, givenBoardSize8_whenPlacingQueen_thenReturnsRowsWithoutQueen) {
     auto *fixedQueenPosition = new square(2, 4);
@@ -74,3 +74,22 @@ TEST(TDDTests, givenBoardSize4WithPlacedQueen_whenSolvingProblem_thenReturnsSolu
     ASSERT_TRUE(returnValue.length() > 0);
 }
 
+TEST(TDDTests, givenBoardSize8WithPlacedQueen_whenSolvingProblem_thenReturnsSolutionString) {
+    auto returnValue = solveNQueens(8, {1, 0});
+    ASSERT_TRUE(returnValue.length() > 0);
+}
+
+TEST(TDDTests, givenBoardSize16WithPlacedQueen_whenSolvingProblem_thenReturnsSolutionString) {
+    auto returnValue = solveNQueens(16, {1, 0});
+    ASSERT_TRUE(returnValue.length() > 0);
+}
+
+TEST(TDDTests, givenBoardSize24WithPlacedQueen_whenSolvingProblem_thenReturnsSolutionString) {
+    auto returnValue = solveNQueens(24, {1, 0});
+    ASSERT_TRUE(returnValue.length() > 0);
+}
+
+TEST(TDDTests, givenBoardSize32WithPlacedQueen_whenSolvingProblem_thenReturnsSolutionString) {
+    auto returnValue = solveNQueens(32, {1, 0});
+    ASSERT_TRUE(returnValue.length() > 0);
+}
