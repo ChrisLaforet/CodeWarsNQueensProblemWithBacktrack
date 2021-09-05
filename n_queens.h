@@ -15,7 +15,17 @@ class square {
     int row;
 
 public:
+    square() {
+        this->column = 0;
+        this->row = 0;
+    }
+
     square(int column, int row) {
+        this->column = column;
+        this->row = row;
+    }
+
+    void setValues(int column, int row) {
         this->column = column;
         this->row = row;
     }
@@ -29,8 +39,8 @@ public:
     }
 };
 
-bool checkSquareIsAvailable(const std::list<square *>& queenSquares, int column, int row) {
-    for (auto & queenSquare : queenSquares)
+inline bool checkSquareIsAvailable(const std::list<square *>& queenSquares, int column, int row) {
+    for (auto &queenSquare : queenSquares)
     {
         if (queenSquare->getRow() == row) {
             return false;
@@ -56,21 +66,24 @@ bool solveColumn(int squaresPerSide, std::list<square *>& queenSquares,
 
     int column = openColumns[columnOffset];
     bool isSuccess = false;
+    auto *newQueenSquare = new square();
     for (int row = 0; row < squaresPerSide; row++) {
         if (!checkSquareIsAvailable(queenSquares, column, row)) {
             continue;
         }
-        auto *newQueenSquare = new square(column, row);
+        newQueenSquare->setValues(column, row);
         queenSquares.push_back(newQueenSquare);
 
         if (solveColumn(squaresPerSide, queenSquares, openColumns, columnOffset + 1)) {
             isSuccess = true;
             break;
         }
-        delete newQueenSquare;
         queenSquares.pop_back();
     }
 
+    if (!isSuccess) {
+        delete newQueenSquare;
+    }
     return isSuccess;
 }
 
