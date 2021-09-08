@@ -15,11 +15,6 @@ class square {
     int row;
 
 public:
-    square() {
-        this->column = 0;
-        this->row = 0;
-    }
-
     square(int column, int row) {
         this->column = column;
         this->row = row;
@@ -36,6 +31,58 @@ public:
 
     int getRow() const {
         return row;
+    }
+};
+
+class solveColumnData {
+    int squaresPerSide;
+    int columnOffset;
+    int column;
+    int row = 0;
+    square *queenSquare = new square(0, 0);
+
+
+public:
+    solveColumnData(int columnOffset, int column, int squaresPerSide) {
+        this->columnOffset = columnOffset;
+        this->column = column;
+        this->squaresPerSide = squaresPerSide;
+    }
+
+    ~solveColumnData() {
+        delete queenSquare;
+    }
+
+    void setQueenSquare() {
+        queenSquare->setValues(column, row);
+    }
+
+    square *getQueenSquare() {
+        return queenSquare;
+    }
+
+    void releaseQueenSquare() {
+        queenSquare = new square(0, 0);
+    }
+
+    int getColumnOffset() const {
+        return columnOffset;
+    }
+
+    int getColumn() const {
+        return column;
+    }
+
+    int getRow() const {
+        return row;
+    }
+
+    bool nextRow() {
+        if (row >= (squaresPerSide - 1)) {
+            return false;
+        }
+        ++row;
+        return true;
     }
 };
 
@@ -58,36 +105,41 @@ inline bool checkSquareIsAvailable(const std::list<square *>& queenSquares, int 
 //int totalRecursions = 0;
 
 bool solveColumn(int squaresPerSide, std::list<square *>& queenSquares,
-                 const std::vector<int>& openColumns, int columnOffset) {
+                 const std::vector<int>& openColumns) {
 //++totalRecursions;
-    if (columnOffset >= openColumns.size()) {
-        return true;
-    }
 
-    int column = openColumns[columnOffset];
+    std::list<solveColumnData *> solveStack;
+    auto *columnData = new solveColumnData(0, openColumns[0], squaresPerSide);
     bool isSuccess = false;
-    auto *newQueenSquare = new square();
-    for (int row = 0; row < squaresPerSide; row++) {
-        if (!checkSquareIsAvailable(queenSquares, column, row)) {
-            continue;
-        }
-        newQueenSquare->setValues(column, row);
-        queenSquares.push_back(newQueenSquare);
+    do {
+        queenSquares.push_back(columnData->getQueenSquare());
+        do {
+            if (checkSquareIsAvailable(queenSquares, columnData->getColumn(), columnData->getRow())) {
+                columnData->setQueenSquare();
+                if (columnData->getColumnOffset() >= openColumns.size()) {
+                    isSuccess = true;
+                    break;
+                }
 
-        if (solveColumn(squaresPerSide, queenSquares, openColumns, columnOffset + 1)) {
-            isSuccess = true;
-            break;
+                solveStack.push_front(columnData);
+                int nextColumnOffset = columnData->getColumnOffset() + 1;
+                columnData = new solveColumnData(nextColumnOffset, openColumns[nextColumnOffset], squaresPerSide);
+            }
+        } while (columnData->nextRow());
+        if (!isSuccess) {
+            queenSquares.pop_back();
+        } else {
+            columnData->releaseQueenSquare();
         }
-        queenSquares.pop_back();
-    }
+        delete columnData;
+        columnData = solveStack.front();
+        solveStack.pop_front();
+    } while (!isSuccess && !solveStack.empty());
 
-    if (!isSuccess) {
-        delete newQueenSquare;
-    }
     return isSuccess;
 }
 
-std::string getPrintableRepresentation(int squaresPerSide, const std::list<square *>& queenSquares) {
+std::string createPrintableRepresentationOfBoard(int squaresPerSide, const std::list<square *>& queenSquares) {
     std::string result;
     for (int row = 0; row < squaresPerSide; row++) {
         for (int column = 0; column < squaresPerSide; column++) {
@@ -124,8 +176,8 @@ std::string solveNQueens(int n, std::pair<int, int> mandatoryQueenCoordinates) {
 
     std::string *returnValue;
 //totalRecursions = 0;
-if (solveColumn(n, queenSquares, openColumns, 0)) {
-        std::string solution = getPrintableRepresentation(n, queenSquares);
+    if (solveColumn(n, queenSquares, openColumns)) {
+        std::string solution = createPrintableRepresentationOfBoard(n, queenSquares);
         returnValue = new std::string(solution);
     } else {
         returnValue = new std::string("");
