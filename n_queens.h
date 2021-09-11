@@ -134,72 +134,51 @@ std::string createPrintableRepresentationOfBoard(int squaresPerSide, const std::
     }
     return result;
 }
-//int totalRecursions = 0;
 
 bool solveColumn(int squaresPerSide, std::list<square *>& queenSquares,
                  const int *openColumns, int openColumnCount) {
-//++totalRecursions;
-
     std::list<solveColumnData *> solveStack;
     auto *columnData = new solveColumnData(0, openColumns[0], squaresPerSide);
     solveStack.push_front(columnData);
-std::cout << "PUSH_FRONT" << std::endl;
 
     bool isSuccess = false;
     do {
-//std::cout <<  ">>>Col, Row = " << columnData->getColumn() << "," << columnData->getRow() << std::endl;
         do {
-std::cout << "At Col, Row = " << columnData->getColumn() << "," <<  columnData->getRow() << std::endl;
             if (!isSuccess && checkSquareIsAvailable(queenSquares, columnData->getColumn(), columnData->getRow())) {
-std::cout << "Possible square at Col, Row = " << columnData->getColumn() << "," << columnData->getRow() << std::endl;
                 int nextColumnOffset = columnData->getColumnOffset() + 1;
-//for (int count = 0; count < solveStack.size(); count++) {
-//    std::cout<<" ";
-//}
-//std::cout<<nextColumnOffset<<" ("<<queenSquares.size()<< ")"<<std::endl<<std::flush;
+
                 columnData->setQueenSquare();
                 if (!columnData->isQueenSquarePushed()) {
                     queenSquares.push_back(columnData->getQueenSquare());
-//std::cout << "> PUSH_BACK" << std::endl;
                     columnData->setQueenSquarePushed(true);
                 }
                 if (nextColumnOffset >= openColumnCount) {
                     isSuccess = true;
-std::cout << "SOLVED " << nextColumnOffset << "/" << openColumnCount << std::endl;
                     break;
                 }
                 columnData = new solveColumnData(nextColumnOffset, openColumns[nextColumnOffset], squaresPerSide);
                 solveStack.push_front(columnData);
-//std::cout << "PUSH_FRONT" << std::endl;
             } else if (!columnData->nextRow()) {
                 break;
             }
-std::cout << "In LEV " << solveStack.size() << " Col, Row = " << columnData->getColumn() << "," << columnData->getRow() << std::endl;
-std::cout <<  createPrintableRepresentationOfBoard(squaresPerSide, queenSquares);
         } while (!isSuccess);
 
-std::cout << "Exit LEV " << std::endl;
         if (!isSuccess) {
-//            solveStack.pop_front();
             do {
                 if (columnData->isQueenSquarePushed()) {
                     queenSquares.pop_back();
-//std::cout << ">POP_BACK" << std::endl;
                 }
                 delete columnData;
                 columnData = nullptr;
 
                 solveStack.pop_front();
-//std::cout << "POP_FRONT" << std::endl;
 
                 if (solveStack.empty()) {
                     break;
                 }
                 columnData = solveStack.front();
 
-//std::cout << "In LEV " << solveStack.size() << " Col, Row = " << columnData->getColumn() << "," << columnData->getRow() << std::endl;
                 if (columnData->nextRow()) {
-std::cout << "CIRCLE" << std::endl;
                     break;
                 }
             } while (true);
@@ -218,7 +197,6 @@ std::cout << "CIRCLE" << std::endl;
         }
         delete columnData;
     }
-std::cout << "Final queensquares size:"<< queenSquares.size() <<std::endl;
     return isSuccess;
 }
 
@@ -247,15 +225,12 @@ std::string solveNQueens(int n, std::pair<int, int> mandatoryQueenCoordinates) {
     }
 
     std::string *returnValue;
-//totalRecursions = 0;
-std::cout << "START SOLVING " <<  n << std::endl;
     if (solveColumn(n, queenSquares, openColumns, columnCollector.size())) {
         std::string solution = createPrintableRepresentationOfBoard(n, queenSquares);
         returnValue = new std::string(solution);
     } else {
         returnValue = new std::string("");
     }
-//std::cerr << totalRecursions << std::endl;
     for (const auto node: queenSquares)
         delete node;
     queenSquares.clear();
