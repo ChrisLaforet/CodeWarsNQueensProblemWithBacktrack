@@ -144,7 +144,7 @@ bool solveColumn(int squaresPerSide, std::list<square *>& queenSquares,
     bool isSuccess = false;
     do {
         do {
-            if (!isSuccess && checkSquareIsAvailable(queenSquares, columnData->getColumn(), columnData->getRow())) {
+            if (checkSquareIsAvailable(queenSquares, columnData->getColumn(), columnData->getRow())) {
                 int nextColumnOffset = columnData->getColumnOffset() + 1;
 
                 columnData->setQueenSquare();
@@ -161,7 +161,7 @@ bool solveColumn(int squaresPerSide, std::list<square *>& queenSquares,
             } else if (!columnData->nextRow()) {
                 break;
             }
-        } while (!isSuccess);
+        } while (true);
 
         if (!isSuccess) {
             do {
@@ -235,7 +235,7 @@ std::string solveNQueens(int n, std::pair<int, int> mandatoryQueenCoordinates) {
         delete node;
     queenSquares.clear();
 
-    delete openColumns;
+    delete [] openColumns;
     return *returnValue;
 }
 
