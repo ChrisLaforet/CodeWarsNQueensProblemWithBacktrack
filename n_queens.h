@@ -128,15 +128,23 @@ inline int calculateConflictWeightAt(const std::list<queenSquare *>& queenSquare
 
 inline int calculateConflictWeight(const std::list<queenSquare *> queenSquares) {
     int conflictWeight = 0;
+    bool matchedForward = false;
+    bool matchedBackward = false;
     for (auto &target : queenSquares) {
         for (auto &source : queenSquares) {
             if (source->getColumn() == target->getColumn()) {
                 continue;
             }
-            if (target->getRow() == source->getRow() ||
-                target->getForwardCode() == source->getForwardCode() ||
-                target->getBackwardCode() == source->getBackwardCode()) {
+            if (target->getRow() == source->getRow()) {
                 ++conflictWeight;
+            }
+            if (!matchedForward && target->getForwardCode() == source->getForwardCode()) {
+                ++conflictWeight;
+                matchedForward = true;
+            }
+            if (!matchedBackward && target->getBackwardCode() == source->getBackwardCode()) {
+                ++conflictWeight;
+                matchedBackward = true;
             }
         }
     }
