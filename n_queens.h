@@ -110,31 +110,39 @@ bool solveColumn(int squaresPerSide, std::list<square *>& queenSquares,
 
     std::list<solveColumnData *> solveStack;
     auto *columnData = new solveColumnData(0, openColumns[0], squaresPerSide);
+
     bool isSuccess = false;
     do {
-        queenSquares.push_back(columnData->getQueenSquare());
         do {
-            if (checkSquareIsAvailable(queenSquares, columnData->getColumn(), columnData->getRow())) {
+            if (!isSuccess && checkSquareIsAvailable(queenSquares, columnData->getColumn(), columnData->getRow())) {
+                int nextColumnOffset = columnData->getColumnOffset() + 1;
+for (int count = 0; count < solveStack.size(); count++) {
+    std::cout<<" ";
+}
+std::cout<<nextColumnOffset<<" ("<<queenSquares.size()<< ")"<<std::endl<<std::flush;
                 columnData->setQueenSquare();
-                if (columnData->getColumnOffset() >= openColumns.size()) {
+                if (nextColumnOffset >= openColumns.size()) {
+                    queenSquares.push_back(columnData->getQueenSquare());
                     isSuccess = true;
                     break;
                 }
 
                 solveStack.push_front(columnData);
-                int nextColumnOffset = columnData->getColumnOffset() + 1;
                 columnData = new solveColumnData(nextColumnOffset, openColumns[nextColumnOffset], squaresPerSide);
+                queenSquares.push_back(columnData->getQueenSquare());
             }
-        } while (columnData->nextRow());
+        } while (!isSuccess && columnData->nextRow());
         if (!isSuccess) {
             queenSquares.pop_back();
         } else {
             columnData->releaseQueenSquare();
         }
         delete columnData;
-        columnData = solveStack.front();
-        solveStack.pop_front();
-    } while (!isSuccess && !solveStack.empty());
+        if (!solveStack.empty()) {
+            columnData = solveStack.front();
+            solveStack.pop_front();
+        }
+    } while (!solveStack.empty());
 
     return isSuccess;
 }
