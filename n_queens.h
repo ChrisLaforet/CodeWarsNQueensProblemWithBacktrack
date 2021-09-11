@@ -85,8 +85,12 @@ public:
         return row;
     }
 
+    bool isNextRowAvailable() {
+        return row < (squaresPerSide - 1);
+    }
+
     bool nextRow() {
-        if (row >= (squaresPerSide - 1)) {
+        if (!isNextRowAvailable()) {
             return false;
         }
         ++row;
@@ -145,8 +149,9 @@ std::cout << "PUSH_FRONT" << std::endl;
     do {
 //std::cout <<  ">>>Col, Row = " << columnData->getColumn() << "," << columnData->getRow() << std::endl;
         do {
+std::cout << "At Col, Row = " << columnData->getColumn() << "," <<  columnData->getRow() << std::endl;
             if (!isSuccess && checkSquareIsAvailable(queenSquares, columnData->getColumn(), columnData->getRow())) {
-std::cout << "Possible square at Col, Row = " << columnData->getColumn()   << "," <<    columnData->getRow() << std::endl;
+std::cout << "Possible square at Col, Row = " << columnData->getColumn() << "," << columnData->getRow() << std::endl;
                 int nextColumnOffset = columnData->getColumnOffset() + 1;
 //for (int count = 0; count < solveStack.size(); count++) {
 //    std::cout<<" ";
@@ -155,21 +160,23 @@ std::cout << "Possible square at Col, Row = " << columnData->getColumn()   << ",
                 columnData->setQueenSquare();
                 if (!columnData->isQueenSquarePushed()) {
                     queenSquares.push_back(columnData->getQueenSquare());
-std::cout << "> PUSH_BACK" << std::endl;
+//std::cout << "> PUSH_BACK" << std::endl;
                     columnData->setQueenSquarePushed(true);
                 }
-                if (nextColumnOffset > openColumnCount) {
+                if (nextColumnOffset >= openColumnCount) {
                     isSuccess = true;
 std::cout << "SOLVED " << nextColumnOffset << "/" << openColumnCount << std::endl;
                     break;
                 }
                 columnData = new solveColumnData(nextColumnOffset, openColumns[nextColumnOffset], squaresPerSide);
                 solveStack.push_front(columnData);
-std::cout << "PUSH_FRONT" << std::endl;
+//std::cout << "PUSH_FRONT" << std::endl;
+            } else if (!columnData->nextRow()) {
+                break;
             }
 std::cout << "In LEV " << solveStack.size() << " Col, Row = " << columnData->getColumn() << "," << columnData->getRow() << std::endl;
 std::cout <<  createPrintableRepresentationOfBoard(squaresPerSide, queenSquares);
-        } while (!isSuccess && columnData->nextRow());
+        } while (!isSuccess);
 
 std::cout << "Exit LEV " << std::endl;
         if (!isSuccess) {
@@ -177,13 +184,13 @@ std::cout << "Exit LEV " << std::endl;
             do {
                 if (columnData->isQueenSquarePushed()) {
                     queenSquares.pop_back();
-std::cout << ">POP_BACK" << std::endl;
+//std::cout << ">POP_BACK" << std::endl;
                 }
                 delete columnData;
                 columnData = nullptr;
 
                 solveStack.pop_front();
-                std::cout << "POP_FRONT" << std::endl;
+//std::cout << "POP_FRONT" << std::endl;
 
                 if (solveStack.empty()) {
                     break;
