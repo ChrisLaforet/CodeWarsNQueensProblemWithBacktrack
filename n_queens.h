@@ -10,19 +10,35 @@
 #include <cstring>
 #include <list>
 
-class square {
+inline int calculateForwardCode(int column, int row) {
+    return column + row;
+}
+
+inline int calculateBackwardCode(int column, int row, int squaresPerSide) {
+    return row - column + (squaresPerSide - 1);
+}
+
+class boardSquare {
     int column;
     int row;
+    int squaresPerSide;
+    int forwardCode;
+    int backwardCode;
 
 public:
-    square(int column, int row) {
+    boardSquare(int column, int row, int squaresPerSide) {
         this->column = column;
         this->row = row;
+        this->squaresPerSide = squaresPerSide;
+        this->forwardCode = calculateForwardCode(column, row);
+        this->backwardCode = calculateBackwardCode(column, row, squaresPerSide);
     }
 
     void setValues(int column, int row) {
         this->column = column;
         this->row = row;
+        this->forwardCode = calculateForwardCode(column, row);
+        this->backwardCode = calculateBackwardCode(column, row, squaresPerSide);
     }
 
     int getColumn() const {
@@ -32,6 +48,14 @@ public:
     int getRow() const {
         return row;
     }
+
+    int getForwardCode() const {
+        return forwardCode;
+    }
+
+    int getBackwardCode() const {
+        return backwardCode;
+    }
 };
 
 class solveColumnData {
@@ -39,7 +63,7 @@ class solveColumnData {
     int columnOffset;
     int column;
     int row = 0;
-    square *queenSquare = new square(0, 0);
+    boardSquare *queenSquare = nullptr;
     bool queenSquarePushed = false;
 
 public:
@@ -47,6 +71,7 @@ public:
         this->columnOffset = columnOffset;
         this->column = column;
         this->squaresPerSide = squaresPerSide;
+        this->queenSquare = new boardSquare(0, 0, squaresPerSide);
     }
 
     ~solveColumnData() {
@@ -57,12 +82,12 @@ public:
         queenSquare->setValues(column, row);
     }
 
-    square *getQueenSquare() {
+    boardSquare *getQueenSquare() {
         return queenSquare;
     }
 
     void releaseQueenSquare() {
-        queenSquare = new square(0, 0);
+        queenSquare = new boardSquare(0, 0, squaresPerSide);
     }
 
     bool isQueenSquarePushed() const {
@@ -98,27 +123,21 @@ public:
     }
 };
 
-inline bool checkSquareIsAvailable(const std::list<square *>& queenSquares, int boardColumn, int boardRow) {
+inline bool checkSquareIsAvailable(const std::list<boardSquare *>& queenSquares, int boardColumn, int boardRow, int squaresPerSide) {
+    int forwardCode = calculateForwardCode(boardColumn, boardRow);
+    int backwardCode = calculateBackwardCode(boardColumn, boardRow, squaresPerSide);
     for (auto &queenSquare : queenSquares)
     {
-        if (queenSquare->getRow() == boardRow) {
-            return false;
-        }
-        int row = boardRow + 1;
-        int column = boardColumn + 1;
-        int queenRow = queenSquare->getRow() + 1;
-        int queenColumn = queenSquare->getColumn() + 1;
-        if ((queenColumn + row) == (column + queenRow)) {
-            return false;
-        }
-        if ((queenColumn - row) == (column - queenRow)) {
+        if (queenSquare->getRow() == boardRow ||
+                queenSquare->getForwardCode() == forwardCode ||
+                queenSquare->getBackwardCode() == backwardCode) {
             return false;
         }
     }
     return true;
 }
 
-std::string createPrintableRepresentationOfBoard(int squaresPerSide, const std::list<square *>& queenSquares) {
+std::string createPrintableRepresentationOfBoard(int squaresPerSide, const std::list<boardSquare *>& queenSquares) {
     std::string result;
     for (int row = 0; row < squaresPerSide; row++) {
         for (int column = 0; column < squaresPerSide; column++) {
@@ -135,7 +154,7 @@ std::string createPrintableRepresentationOfBoard(int squaresPerSide, const std::
     return result;
 }
 
-bool solveColumn(int squaresPerSide, std::list<square *>& queenSquares,
+bool solveColumn(int squaresPerSide, std::list<boardSquare *>& queenSquares,
                  const int *openColumns, int openColumnCount) {
     std::list<solveColumnData *> solveStack;
     auto *columnData = new solveColumnData(0, openColumns[0], squaresPerSide);
@@ -144,7 +163,7 @@ bool solveColumn(int squaresPerSide, std::list<square *>& queenSquares,
     bool isSuccess = false;
     do {
         do {
-            if (checkSquareIsAvailable(queenSquares, columnData->getColumn(), columnData->getRow())) {
+            if (checkSquareIsAvailable(queenSquares, columnData->getColumn(), columnData->getRow(), squaresPerSide)) {
                 int nextColumnOffset = columnData->getColumnOffset() + 1;
 
                 columnData->setQueenSquare();
@@ -208,8 +227,8 @@ std::string solveNQueens(int n, std::pair<int, int> mandatoryQueenCoordinates) {
         return "";
     }
 
-    std::list<square *> queenSquares;
-    queenSquares.push_front(new square(mandatoryQueenCoordinates.first, mandatoryQueenCoordinates.second));
+    std::list<boardSquare *> queenSquares;
+    queenSquares.push_front(new boardSquare(mandatoryQueenCoordinates.first, mandatoryQueenCoordinates.second, n));
 
     std::list<int> columnCollector;
     for (int column = 0; column < n; column++) {
