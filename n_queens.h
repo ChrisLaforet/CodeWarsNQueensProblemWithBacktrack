@@ -115,22 +115,20 @@ bool solveColumn(int squaresPerSide, std::list<square *>& queenSquares,
         do {
             if (!isSuccess && checkSquareIsAvailable(queenSquares, columnData->getColumn(), columnData->getRow())) {
                 int nextColumnOffset = columnData->getColumnOffset() + 1;
-for (int count = 0; count < solveStack.size(); count++) {
-    std::cout<<" ";
-}
-std::cout<<nextColumnOffset<<" ("<<queenSquares.size()<< ")"<<std::endl<<std::flush;
+//for (int count = 0; count < solveStack.size(); count++) {
+//    std::cout<<" ";
+//}
+//std::cout<<nextColumnOffset<<" ("<<queenSquares.size()<< ")"<<std::endl<<std::flush;
                 columnData->setQueenSquare();
+                queenSquares.push_back(columnData->getQueenSquare());
                 if (nextColumnOffset >= openColumnCount) {
-                    queenSquares.push_back(columnData->getQueenSquare());
-                    columnData->releaseQueenSquare();
+//                   queenSquares.push_back(columnData->getQueenSquare());
                     isSuccess = true;
-std::cout << "SOLVED " << nextColumnOffset << "/" << openColumnCount << std::endl;
+                    std::cout << "SOLVED " << nextColumnOffset << "/" << openColumnCount << std::endl;
                     break;
                 }
-
                 solveStack.push_front(columnData);
                 columnData = new solveColumnData(nextColumnOffset, openColumns[nextColumnOffset], squaresPerSide);
-                queenSquares.push_back(columnData->getQueenSquare());
             }
         } while (!isSuccess && columnData->nextRow());
 
@@ -151,6 +149,7 @@ std::cout << "SOLVED " << nextColumnOffset << "/" << openColumnCount << std::end
     while (!solveStack.empty()) {
         columnData = solveStack.front();
         solveStack.pop_front();
+        columnData->releaseQueenSquare();
         delete columnData;
     }
     std::cout << "Final queensqares size:"<< queenSquares.size() <<std::endl;
