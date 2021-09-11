@@ -178,13 +178,12 @@ bool solveNQueensFor(const std::list<queenSquare *> queenSquares) {
     int conflictWeight = calculateConflictWeight(queenSquares);
 //    int nextQueenIndex = 0;
     while (conflictWeight != 0) {
-std::cout << conflictWeight << std::endl;
+//std::cout << conflictWeight << std::endl;
 //        int queenIndex = nextQueenIndex++;
 //        nextQueenIndex = nextQueenIndex % squaresPerSide;
         int queenIndex = rand() % squaresPerSide;
         auto whichQueen = findQueenSquareByIndex(queenSquares, queenIndex);
-//        if (whichQueen->isMandatory() || !isInConflictAt(queenSquares, whichQueen->getColumn(), whichQueen->getRow())) {
-        if (whichQueen->isMandatory()) {
+        if (whichQueen->isMandatory() || !isInConflictAt(queenSquares, whichQueen->getColumn(), whichQueen->getRow())) {
             continue;
         }
         moveQueenToMinConflictPosition(queenSquares, whichQueen, conflictWeight);
