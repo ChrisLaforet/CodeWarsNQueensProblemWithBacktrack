@@ -130,6 +130,7 @@ bool solveColumn(int squaresPerSide, std::list<square *>& queenSquares,
                 solveStack.push_front(columnData);
                 columnData = new solveColumnData(nextColumnOffset, openColumns[nextColumnOffset], squaresPerSide);
             }
+            std::cout << "LEV " << solveStack.size() << " Col, Row = " << columnData->getColumn() << "," << columnData->getRow() << std::endl;
         } while (!isSuccess && columnData->nextRow());
 
         if (!isSuccess) {
