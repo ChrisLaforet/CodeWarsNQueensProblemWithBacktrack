@@ -40,7 +40,7 @@ class solveColumnData {
     int column;
     int row = 0;
     square *queenSquare = new square(0, 0);
-
+    bool queenSquarePushed = false;
 
 public:
     solveColumnData(int columnOffset, int column, int squaresPerSide) {
@@ -65,6 +65,14 @@ public:
         queenSquare = new square(0, 0);
     }
 
+    bool isQueenSquarePushed() const {
+        return queenSquarePushed;
+    }
+
+    void setQueenSquarePushed(bool isPushed) {
+        queenSquarePushed = isPushed;
+    }
+
     int getColumnOffset() const {
         return columnOffset;
     }
@@ -86,16 +94,20 @@ public:
     }
 };
 
-inline bool checkSquareIsAvailable(const std::list<square *>& queenSquares, int column, int row) {
+inline bool checkSquareIsAvailable(const std::list<square *>& queenSquares, int boardColumn, int boardRow) {
     for (auto &queenSquare : queenSquares)
     {
-        if (queenSquare->getRow() == row) {
+        if (queenSquare->getRow() == boardRow) {
             return false;
         }
-        if ((queenSquare->getColumn() + row) == (column + queenSquare->getRow())) {
+        int row = boardRow + 1;
+        int column = boardColumn + 1;
+        int queenRow = queenSquare->getRow() + 1;
+        int queenColumn = queenSquare->getColumn() + 1;
+        if ((queenColumn + row) == (column + queenRow)) {
             return false;
         }
-        if ((queenSquare->getColumn() - row) == (column - queenSquare->getRow())) {
+        if ((queenColumn - row) == (column - queenRow)) {
             return false;
         }
     }
@@ -127,51 +139,66 @@ bool solveColumn(int squaresPerSide, std::list<square *>& queenSquares,
     std::list<solveColumnData *> solveStack;
     auto *columnData = new solveColumnData(0, openColumns[0], squaresPerSide);
     solveStack.push_front(columnData);
+std::cout << "PUSH_FRONT" << std::endl;
+
     bool isSuccess = false;
     do {
-std::cout <<  ">>>Col, Row = " << columnData->getColumn() << "," << columnData->getRow() << std::endl;
+//std::cout <<  ">>>Col, Row = " << columnData->getColumn() << "," << columnData->getRow() << std::endl;
         do {
             if (!isSuccess && checkSquareIsAvailable(queenSquares, columnData->getColumn(), columnData->getRow())) {
+std::cout << "Possible square at Col, Row = " << columnData->getColumn()   << "," <<    columnData->getRow() << std::endl;
                 int nextColumnOffset = columnData->getColumnOffset() + 1;
 //for (int count = 0; count < solveStack.size(); count++) {
 //    std::cout<<" ";
 //}
 //std::cout<<nextColumnOffset<<" ("<<queenSquares.size()<< ")"<<std::endl<<std::flush;
                 columnData->setQueenSquare();
-                queenSquares.push_back(columnData->getQueenSquare());
+                if (!columnData->isQueenSquarePushed()) {
+                    queenSquares.push_back(columnData->getQueenSquare());
+std::cout << "> PUSH_BACK" << std::endl;
+                    columnData->setQueenSquarePushed(true);
+                }
                 if (nextColumnOffset > openColumnCount) {
-//                   queenSquares.push_back(columnData->getQueenSquare());
                     isSuccess = true;
-                    std::cout << "SOLVED " << nextColumnOffset << "/" << openColumnCount << std::endl;
+std::cout << "SOLVED " << nextColumnOffset << "/" << openColumnCount << std::endl;
                     break;
                 }
-                solveStack.push_front(columnData);
                 columnData = new solveColumnData(nextColumnOffset, openColumns[nextColumnOffset], squaresPerSide);
+                solveStack.push_front(columnData);
+std::cout << "PUSH_FRONT" << std::endl;
             }
 std::cout << "In LEV " << solveStack.size() << " Col, Row = " << columnData->getColumn() << "," << columnData->getRow() << std::endl;
-            std::cout <<  createPrintableRepresentationOfBoard(squaresPerSide, queenSquares);
+std::cout <<  createPrintableRepresentationOfBoard(squaresPerSide, queenSquares);
         } while (!isSuccess && columnData->nextRow());
 
 std::cout << "Exit LEV " << std::endl;
-
         if (!isSuccess) {
-            queenSquares.pop_back();
-            delete columnData;
-            while (!solveStack.empty()) {
-                columnData = solveStack.front();
+//            solveStack.pop_front();
+            do {
+                if (columnData->isQueenSquarePushed()) {
+                    queenSquares.pop_back();
+std::cout << ">POP_BACK" << std::endl;
+                }
+                delete columnData;
+                columnData = nullptr;
+
                 solveStack.pop_front();
-                if (columnData->nextRow()) {
+                std::cout << "POP_FRONT" << std::endl;
+
+                if (solveStack.empty()) {
                     break;
                 }
-std::cout << "Loop LEV " << solveStack.size() << " Col, Row = " << columnData->getColumn() << "," << columnData->getRow() << std::endl;
-                queenSquares.pop_back();
-                delete columnData;
-            }
+                columnData = solveStack.front();
 
-
+//std::cout << "In LEV " << solveStack.size() << " Col, Row = " << columnData->getColumn() << "," << columnData->getRow() << std::endl;
+                if (columnData->nextRow()) {
+std::cout << "CIRCLE" << std::endl;
+                    break;
+                }
+            } while (true);
         } else {
             columnData->releaseQueenSquare();
-            delete columnData;
+            columnData->setQueenSquarePushed(false);
             break;
         }
     } while (!solveStack.empty());
@@ -179,10 +206,12 @@ std::cout << "Loop LEV " << solveStack.size() << " Col, Row = " << columnData->g
     while (!solveStack.empty()) {
         columnData = solveStack.front();
         solveStack.pop_front();
-        columnData->releaseQueenSquare();
+        if (columnData->isQueenSquarePushed()) {
+            columnData->releaseQueenSquare();
+        }
         delete columnData;
     }
-    std::cout << "Final queensqares size:"<< queenSquares.size() <<std::endl;
+std::cout << "Final queensquares size:"<< queenSquares.size() <<std::endl;
     return isSuccess;
 }
 
