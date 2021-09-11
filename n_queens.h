@@ -25,7 +25,6 @@ class queenSquare {
     int forwardCode;
     int backwardCode;
     bool mandatory;
-    int conflictCount;
 
 public:
     queenSquare(int column, int row, int squaresPerSide, bool isMandatory) {
@@ -35,15 +34,20 @@ public:
         this->forwardCode = calculateForwardCode(column, row);
         this->backwardCode = calculateBackwardCode(column, row, squaresPerSide);
         this->mandatory = isMandatory;
-        this->conflictCount = 0;
     }
 
     void moveQueen(int column, int row) {
-        this->conflictCount = 0;
         if (isMandatory()) {
             return;
         }
         this->column = column;
+        setRow(row);
+    }
+
+    void setRow(int row) {
+        if (isMandatory()) {
+            return;
+        }
         this->row = row;
         this->forwardCode = calculateForwardCode(column, row);
         this->backwardCode = calculateBackwardCode(column, row, squaresPerSide);
@@ -68,37 +72,7 @@ public:
     int getBackwardCode() const {
         return backwardCode;
     }
-
-    int getConflictCount() const {
-        return conflictCount;
-    }
-
-    void clearConflictCount() {
-        conflictCount = 0;
-    }
-
-    void incrementConflictCount() {
-        conflictCount++;
-    }
 };
-
-inline bool countConflictsFor(const std::list<queenSquare *>& queenSquares, int boardColumn, int boardRow) {
-    int forwardCode = calculateForwardCode(boardColumn, boardRow);
-    int backwardCode = calculateBackwardCode(boardColumn, boardRow, (int)queenSquares.size());
-    int conflictCount = 0;
-    for (auto &queenSquare : queenSquares)
-    {
-        if (queenSquare->getColumn() == boardColumn) {
-            continue;
-        }
-        if (queenSquare->getRow() == boardRow ||
-                queenSquare->getForwardCode() == forwardCode ||
-                queenSquare->getBackwardCode() == backwardCode) {
-            conflictCount++;
-        }
-    }
-    return conflictCount;
-}
 
 std::string createPrintableRepresentationOfBoard(int squaresPerSide, const std::list<queenSquare *>& queenSquares) {
     std::string result;
@@ -117,13 +91,107 @@ std::string createPrintableRepresentationOfBoard(int squaresPerSide, const std::
     return result;
 }
 
-void calculateConflictsFor(const std::list<queenSquare *> queenSquares) {
+inline bool isInConflictAt(const std::list<queenSquare *>& queenSquares, int column, int row) {
+    int forwardCode = calculateForwardCode(column, row);
+    int backwardCode = calculateBackwardCode(column, row, (int)queenSquares.size());
+    for (auto &queenSquare : queenSquares)
+    {
+        if (queenSquare->getColumn() == column) {
+            continue;
+        }
+        if (queenSquare->getRow() == row ||
+                queenSquare->getForwardCode() == forwardCode ||
+                queenSquare->getBackwardCode() == backwardCode) {
+            return true;
+        }
+    }
+    return false;
+}
+
+inline int calculateConflictWeightAt(const std::list<queenSquare *>& queenSquares, int column, int row) {
+    int forwardCode = calculateForwardCode(column, row);
+    int backwardCode = calculateBackwardCode(column, row, (int)queenSquares.size());
+    int totalConflicts = 0;
+    for (auto &queenSquare : queenSquares)
+    {
+        if (queenSquare->getColumn() == column) {
+            continue;
+        }
+        if (queenSquare->getRow() == row ||
+        queenSquare->getForwardCode() == forwardCode ||
+        queenSquare->getBackwardCode() == backwardCode) {
+            ++totalConflicts;
+        }
+    }
+    return totalConflicts;
+}
+
+inline int calculateConflictWeight(const std::list<queenSquare *> queenSquares) {
+    int conflictWeight = 0;
+    for (auto &target : queenSquares) {
+        for (auto &source : queenSquares) {
+            if (source->getColumn() == target->getColumn()) {
+                continue;
+            }
+            if (target->getRow() == source->getRow() ||
+                target->getForwardCode() == source->getForwardCode() ||
+                target->getBackwardCode() == source->getBackwardCode()) {
+                ++conflictWeight;
+            }
+        }
+    }
+    return conflictWeight;
+}
+
+queenSquare *findQueenSquareByIndex(const std::list<queenSquare *> queenSquares, int index) {
+    if (index < 0 || index >= (int)queenSquares.size()) {
+        throw;      // invalid index
+    }
+    auto it = std::next(queenSquares.begin(), index);
+    return *it;
+}
+
+void moveQueenToMinConflictPosition(const std::list<queenSquare *> queenSquares, queenSquare *targetQueen, int initialConflictWeight) {
+    int originalRow = targetQueen->getRow();
+    int minConflictRow = targetQueen->getRow();
+    int minConflictWeight = (int)queenSquares.size() + 1;
+    for (int row = 0; row < (int)queenSquares.size(); row++) {
+//        if (row == originalRow) {
+//            continue;
+//        }
+//        if (isInConflictAt(queenSquares, targetQueen->getColumn(), row)) {
+//            continue;
+//        }
+//        targetQueen->setRow(row);
+        int conflictWeight = calculateConflictWeightAt(queenSquares, targetQueen->getColumn(), row);
+        if (conflictWeight < minConflictWeight) {
+            minConflictWeight = conflictWeight;
+            minConflictRow = row;
+        }
+    }
+std::cout << "Move queen at " << targetQueen->getColumn() << " to " << minConflictRow << " from " << originalRow << std::endl;
+    targetQueen->setRow(minConflictRow);
 }
 
 bool solveNQueensFor(const std::list<queenSquare *> queenSquares) {
-    while (queensAreConflicting(queenSquares)) {
-
+    int squaresPerSide = (int)queenSquares.size();
+    int conflictWeight = calculateConflictWeight(queenSquares);
+//    int nextQueenIndex = 0;
+    while (conflictWeight != 0) {
+std::cout << conflictWeight << std::endl;
+//        int queenIndex = nextQueenIndex++;
+//        nextQueenIndex = nextQueenIndex % squaresPerSide;
+        int queenIndex = rand() % squaresPerSide;
+        auto whichQueen = findQueenSquareByIndex(queenSquares, queenIndex);
+//        if (whichQueen->isMandatory() || !isInConflictAt(queenSquares, whichQueen->getColumn(), whichQueen->getRow())) {
+        if (whichQueen->isMandatory()) {
+            continue;
+        }
+        moveQueenToMinConflictPosition(queenSquares, whichQueen, conflictWeight);
+        conflictWeight = calculateConflictWeight(queenSquares);
     }
+    // how to detect a non-solvable condition?????
+    return true;
 }
 
 std::string solveNQueens(int n, std::pair<int, int> mandatoryQueenCoordinates) {
@@ -139,8 +207,8 @@ std::string solveNQueens(int n, std::pair<int, int> mandatoryQueenCoordinates) {
     std::list<int> columnCollector;
     for (int column = 0; column < n; column++) {
         if (column != mandatoryQueenCoordinates.first) {
-            // position all the other queens on row 0
-            queenSquares.push_back(new queenSquare(column, 0, n, false)));
+            // position all the other queens on random rows
+            queenSquares.push_back(new queenSquare(column, rand() % n, n, false));
         } else {
             // can be extended to multiple mandatory queens if needed
             queenSquares.push_back(new queenSquare(mandatoryQueenCoordinates.first, mandatoryQueenCoordinates.second, n, true));
