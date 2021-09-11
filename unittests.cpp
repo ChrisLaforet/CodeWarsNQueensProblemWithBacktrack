@@ -34,7 +34,7 @@ int main() {
 //}
 //
 //TEST(TDDTests, givenSizeOf4AndAFixedQueenPositionInRange_whenCreatingBoard_thenFails) {
-//    auto *fixedQueenPosition = new boardSquare(1, 3);
+//    auto *fixedQueenPosition = new queenSquare(1, 3);
 //    auto *solver = new n_queens(4, fixedQueenPosition);
 //    ASSERT_TRUE( solver != nullptr);
 //    board &board = solver->getBoard();
@@ -43,7 +43,7 @@ int main() {
 //}
 //
 //TEST(TDDTests, givenSizeOf4AndAFixedQueenPositionOutOfRange_whenCreatingBoard_thenCreatesBoardSizeBySize) {
-//    auto *fixedQueenPosition = new boardSquare(2, 4);
+//    auto *fixedQueenPosition = new queenSquare(2, 4);
 //    try {
 //        new n_queens(4, fixedQueenPosition);
 //        FAIL();
@@ -53,7 +53,7 @@ int main() {
 //}
 
 //TEST(TDDTests, givenBoardSize8_whenPlacing2QueensOnSameRow_thenReturnsPressureOf1OnTargetQueen) {
-//    auto *fixedQueenPosition = new boardSquare(2, 4);
+//    auto *fixedQueenPosition = new queenSquare(2, 4);
 //    auto *sut = new n_queens(8, fixedQueenPosition);
 //    auto board = sut->getBoard();
 //    auto *weights = board.getWeights(4);
@@ -61,7 +61,7 @@ int main() {
 //}
 
 //TEST(TDDTests, givenBoardSize8_whenPlacingQueen_thenReturnsRowsWithoutQueen) {
-//    auto *fixedQueenPosition = new boardSquare(2, 4);
+//    auto *fixedQueenPosition = new queenSquare(2, 4);
 //    auto *sut = new n_queens(8, fixedQueenPosition);
 //    auto board = sut->getBoard();
 //    int columnCount = 0;
