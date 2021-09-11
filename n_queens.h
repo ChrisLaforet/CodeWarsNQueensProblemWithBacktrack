@@ -102,61 +102,6 @@ inline bool checkSquareIsAvailable(const std::list<square *>& queenSquares, int 
     return true;
 }
 
-//int totalRecursions = 0;
-
-bool solveColumn(int squaresPerSide, std::list<square *>& queenSquares,
-                 const int *openColumns, int openColumnCount) {
-//++totalRecursions;
-
-    std::list<solveColumnData *> solveStack;
-    auto *columnData = new solveColumnData(0, openColumns[0], squaresPerSide);
-    bool isSuccess = false;
-    do {
-        do {
-            if (!isSuccess && checkSquareIsAvailable(queenSquares, columnData->getColumn(), columnData->getRow())) {
-                int nextColumnOffset = columnData->getColumnOffset() + 1;
-//for (int count = 0; count < solveStack.size(); count++) {
-//    std::cout<<" ";
-//}
-//std::cout<<nextColumnOffset<<" ("<<queenSquares.size()<< ")"<<std::endl<<std::flush;
-                columnData->setQueenSquare();
-                queenSquares.push_back(columnData->getQueenSquare());
-                if (nextColumnOffset >= openColumnCount) {
-//                   queenSquares.push_back(columnData->getQueenSquare());
-                    isSuccess = true;
-                    std::cout << "SOLVED " << nextColumnOffset << "/" << openColumnCount << std::endl;
-                    break;
-                }
-                solveStack.push_front(columnData);
-                columnData = new solveColumnData(nextColumnOffset, openColumns[nextColumnOffset], squaresPerSide);
-            }
-            std::cout << "LEV " << solveStack.size() << " Col, Row = " << columnData->getColumn() << "," << columnData->getRow() << std::endl;
-        } while (!isSuccess && columnData->nextRow());
-
-        if (!isSuccess) {
-            queenSquares.pop_back();
-            delete columnData;
-            if (!solveStack.empty()) {
-                columnData = solveStack.front();
-                solveStack.pop_front();
-            }
-        } else {
-            columnData->releaseQueenSquare();
-            delete columnData;
-            break;
-        }
-    } while (!solveStack.empty());
-
-    while (!solveStack.empty()) {
-        columnData = solveStack.front();
-        solveStack.pop_front();
-        columnData->releaseQueenSquare();
-        delete columnData;
-    }
-    std::cout << "Final queensqares size:"<< queenSquares.size() <<std::endl;
-    return isSuccess;
-}
-
 std::string createPrintableRepresentationOfBoard(int squaresPerSide, const std::list<square *>& queenSquares) {
     std::string result;
     for (int row = 0; row < squaresPerSide; row++) {
@@ -172,6 +117,73 @@ std::string createPrintableRepresentationOfBoard(int squaresPerSide, const std::
         result += "\n";
     }
     return result;
+}
+//int totalRecursions = 0;
+
+bool solveColumn(int squaresPerSide, std::list<square *>& queenSquares,
+                 const int *openColumns, int openColumnCount) {
+//++totalRecursions;
+
+    std::list<solveColumnData *> solveStack;
+    auto *columnData = new solveColumnData(0, openColumns[0], squaresPerSide);
+    solveStack.push_front(columnData);
+    bool isSuccess = false;
+    do {
+std::cout <<  ">>>Col, Row = " << columnData->getColumn() << "," << columnData->getRow() << std::endl;
+        do {
+            if (!isSuccess && checkSquareIsAvailable(queenSquares, columnData->getColumn(), columnData->getRow())) {
+                int nextColumnOffset = columnData->getColumnOffset() + 1;
+//for (int count = 0; count < solveStack.size(); count++) {
+//    std::cout<<" ";
+//}
+//std::cout<<nextColumnOffset<<" ("<<queenSquares.size()<< ")"<<std::endl<<std::flush;
+                columnData->setQueenSquare();
+                queenSquares.push_back(columnData->getQueenSquare());
+                if (nextColumnOffset > openColumnCount) {
+//                   queenSquares.push_back(columnData->getQueenSquare());
+                    isSuccess = true;
+                    std::cout << "SOLVED " << nextColumnOffset << "/" << openColumnCount << std::endl;
+                    break;
+                }
+                solveStack.push_front(columnData);
+                columnData = new solveColumnData(nextColumnOffset, openColumns[nextColumnOffset], squaresPerSide);
+            }
+std::cout << "In LEV " << solveStack.size() << " Col, Row = " << columnData->getColumn() << "," << columnData->getRow() << std::endl;
+            std::cout <<  createPrintableRepresentationOfBoard(squaresPerSide, queenSquares);
+        } while (!isSuccess && columnData->nextRow());
+
+std::cout << "Exit LEV " << std::endl;
+
+        if (!isSuccess) {
+            queenSquares.pop_back();
+            delete columnData;
+            while (!solveStack.empty()) {
+                columnData = solveStack.front();
+                solveStack.pop_front();
+                if (columnData->nextRow()) {
+                    break;
+                }
+std::cout << "Loop LEV " << solveStack.size() << " Col, Row = " << columnData->getColumn() << "," << columnData->getRow() << std::endl;
+                queenSquares.pop_back();
+                delete columnData;
+            }
+
+
+        } else {
+            columnData->releaseQueenSquare();
+            delete columnData;
+            break;
+        }
+    } while (!solveStack.empty());
+
+    while (!solveStack.empty()) {
+        columnData = solveStack.front();
+        solveStack.pop_front();
+        columnData->releaseQueenSquare();
+        delete columnData;
+    }
+    std::cout << "Final queensqares size:"<< queenSquares.size() <<std::endl;
+    return isSuccess;
 }
 
 std::string solveNQueens(int n, std::pair<int, int> mandatoryQueenCoordinates) {
