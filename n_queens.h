@@ -246,12 +246,16 @@ bool solveNQueensFor(const std::list<queenSquare *> queenSquares) {
 
 std::string *solveNQueens(int n, std::pair<int, int> mandatoryQueenCoordinates, std::list<queenSquare *> queenSquares) {
     std::string *returnValue;
-    for (int attempt = 0; attempt < 3; attempt++) {
-        int row= mandatoryQueenCoordinates.second + 1;
+    for (int attempt = 0; attempt < 2; attempt++) {
+        int row = attempt == 0 ? mandatoryQueenCoordinates.second + 1 : mandatoryQueenCoordinates.second - 1;
         for (int column = 0; column < n; column++) {
             if (column != mandatoryQueenCoordinates.first) {
-                // position all the other queens on random rows
-                queenSquares.push_back(new queenSquare(column, row++ % n, n, false));
+                if (row < 0) {
+                    row = n - 1;
+                }
+std::cout << row << std::endl;
+                queenSquares.push_back(new queenSquare(column, row, n % n, false));
+                row = attempt == 0 ? row + 1 : row - 1;
             } else {
                 // can be extended to multiple mandatory queens if needed
                 queenSquares.push_back(new queenSquare(mandatoryQueenCoordinates.first, mandatoryQueenCoordinates.second, n, true));
