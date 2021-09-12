@@ -168,7 +168,7 @@ queenSquare *findQueenSquareByIndex(const std::list<queenSquare *> queenSquares,
     return *it;
 }
 
-bool moveQueenToMinConflictPosition(const std::list<queenSquare *> queenSquares, queenSquare *targetQueen, int initialConflictWeight) {
+bool moveQueenToMinConflictPosition(const std::list<queenSquare *> queenSquares, queenSquare *targetQueen) {
     int initialRow = targetQueen->getRow();
     int minConflictRow = targetQueen->getRow();
     int minConflictWeight = (int)queenSquares.size() + 1;
@@ -213,7 +213,7 @@ bool solveNQueensFor(const std::list<queenSquare *> queenSquares) {
         if (!isInConflictAt(queenSquares, queen->getColumn(), queen->getRow())) {
             continue;
         }
-        if (moveQueenToMinConflictPosition(queenSquares, queen, conflictWeight)) {
+        if (moveQueenToMinConflictPosition(queenSquares, queen)) {
             conflictWeight = calculateConflictWeight(queenSquares);
             sequentialNonMovesOfQueen = 0;
         } else {
