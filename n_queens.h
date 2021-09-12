@@ -203,9 +203,9 @@ bool solveNQueensFor(const std::list<queenSquare *> queenSquares) {
     int lastConflictWeight = -1;
     int failedIterations = 0;
     int failsToTriggerReset = squaresPerSide * (int)ceil(sqrt(squaresPerSide));
-    int sequentialNonMovesOfQueen = 0;
+//    int numberOfQueensToMoveOnReset =  squaresPerSide / (int)ceil(sqrt(squaresPerSide));
     int numberOfQueensToMoveOnReset = (int)ceil(sqrt(squaresPerSide));
-    int resetsToTriggerStalemate = squaresPerSide * squaresPerSide;
+    int resetsToTriggerStalemate = failsToTriggerReset;
     int totalResets = 0;
     bool status = true;
     while (conflictWeight != 0) {
@@ -215,9 +215,6 @@ bool solveNQueensFor(const std::list<queenSquare *> queenSquares) {
         }
         if (moveQueenToMinConflictPosition(queenSquares, queen)) {
             conflictWeight = calculateConflictWeight(queenSquares);
-            sequentialNonMovesOfQueen = 0;
-        } else {
-            sequentialNonMovesOfQueen++;
         }
 
         // break a stalemate?
@@ -226,7 +223,7 @@ bool solveNQueensFor(const std::list<queenSquare *> queenSquares) {
             failedIterations = 0;
         } else {
             failedIterations++;
-            if (sequentialNonMovesOfQueen > squaresPerSide || failedIterations > failsToTriggerReset) {
+            if (failedIterations > failsToTriggerReset) {
 //std::cout << "FAILED" << std::endl;
                 queen->setRow(rand() % squaresPerSide);
                 for (int moves = 0; moves < numberOfQueensToMoveOnReset - 1; moves++) {
@@ -235,8 +232,6 @@ bool solveNQueensFor(const std::list<queenSquare *> queenSquares) {
                 conflictWeight = calculateConflictWeight(queenSquares);
 
                 failedIterations = 0;
-                sequentialNonMovesOfQueen = 0;
-
                 ++totalResets;
                 if (totalResets > resetsToTriggerStalemate) {
 //std::cout << "STALEMATE" << std::endl;
@@ -247,6 +242,39 @@ bool solveNQueensFor(const std::list<queenSquare *> queenSquares) {
         }
     }
     return status;
+}
+
+std::string *solveNQueens(int n, std::pair<int, int> mandatoryQueenCoordinates, std::list<queenSquare *> queenSquares) {
+    std::string *returnValue;
+    for (int attempt = 0; attempt < 3; attempt++) {
+        for (int column = 0; column < n; column++) {
+            if (column != mandatoryQueenCoordinates.first) {
+                // position all the other queens on random rows
+                queenSquares.push_back(new queenSquare(column, rand() % n, n, false));
+            } else {
+                // can be extended to multiple mandatory queens if needed
+                queenSquares.push_back(new queenSquare(mandatoryQueenCoordinates.first, mandatoryQueenCoordinates.second, n, true));
+            }
+        }
+        std::string *returnValue = nullptr;
+        if (solveNQueensFor(queenSquares)) {
+            std::string solution = createPrintableRepresentationOfBoard(n, queenSquares);
+            returnValue = new std::string(solution);
+            std::cout << "SOLVED" << std::endl;
+
+            for (const auto node: queenSquares)
+                delete node;
+            queenSquares.clear();
+
+            return returnValue;
+        }
+
+std::cout << "RETRY" << std::endl;
+        for (const auto node: queenSquares)
+            delete node;
+        queenSquares.clear();
+    }
+    return new std::string("");
 }
 
 std::string solveNQueens(int n, std::pair<int, int> mandatoryQueenCoordinates) {
@@ -260,29 +288,7 @@ std::string solveNQueens(int n, std::pair<int, int> mandatoryQueenCoordinates) {
     srand(time(NULL));
 
     std::list<queenSquare *> queenSquares;
-
-    std::list<int> columnCollector;
-    for (int column = 0; column < n; column++) {
-        if (column != mandatoryQueenCoordinates.first) {
-            // position all the other queens on random rows
-            queenSquares.push_back(new queenSquare(column, rand() % n, n, false));
-        } else {
-            // can be extended to multiple mandatory queens if needed
-            queenSquares.push_back(new queenSquare(mandatoryQueenCoordinates.first, mandatoryQueenCoordinates.second, n, true));
-        }
-    }
-
-    std::string *returnValue;
-    if (solveNQueensFor(queenSquares)) {
-        std::string solution = createPrintableRepresentationOfBoard(n, queenSquares);
-        returnValue = new std::string(solution);
-    } else {
-        returnValue = new std::string("");
-    }
-
-    for (const auto node: queenSquares)
-        delete node;
-    queenSquares.clear();
+    std::string *returnValue = solveNQueens(n, mandatoryQueenCoordinates, queenSquares);
 
     return *returnValue;
 }
