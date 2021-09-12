@@ -9,6 +9,7 @@
 #include <string>
 #include <cstring>
 #include <list>
+#include <math.h>
 
 inline int calculateForwardCode(int column, int row) {
     return column + row;
@@ -112,15 +113,23 @@ inline int calculateConflictWeightAt(const std::list<queenSquare *>& queenSquare
     int forwardCode = calculateForwardCode(column, row);
     int backwardCode = calculateBackwardCode(column, row, (int)queenSquares.size());
     int totalConflicts = 0;
+    bool matchedForward = false;
+    bool matchedBackward = false;
     for (auto &queenSquare : queenSquares)
     {
         if (queenSquare->getColumn() == column) {
             continue;
         }
-        if (queenSquare->getRow() == row ||
-        queenSquare->getForwardCode() == forwardCode ||
-        queenSquare->getBackwardCode() == backwardCode) {
+        if (queenSquare->getRow() == row) {
             ++totalConflicts;
+        }
+        if (!matchedForward && queenSquare->getForwardCode() == forwardCode) {
+            ++totalConflicts;
+            matchedForward = true;
+        }
+        if (!matchedBackward && queenSquare->getBackwardCode() == backwardCode) {
+            ++totalConflicts;
+            matchedBackward = true;
         }
     }
     return totalConflicts;
@@ -159,46 +168,85 @@ queenSquare *findQueenSquareByIndex(const std::list<queenSquare *> queenSquares,
     return *it;
 }
 
-void moveQueenToMinConflictPosition(const std::list<queenSquare *> queenSquares, queenSquare *targetQueen, int initialConflictWeight) {
-    int originalRow = targetQueen->getRow();
+bool moveQueenToMinConflictPosition(const std::list<queenSquare *> queenSquares, queenSquare *targetQueen, int initialConflictWeight) {
+    int initialRow = targetQueen->getRow();
     int minConflictRow = targetQueen->getRow();
     int minConflictWeight = (int)queenSquares.size() + 1;
     for (int row = 0; row < (int)queenSquares.size(); row++) {
-//        if (row == originalRow) {
-//            continue;
-//        }
-//        if (isInConflictAt(queenSquares, targetQueen->getColumn(), row)) {
-//            continue;
-//        }
-//        targetQueen->setRow(row);
         int conflictWeight = calculateConflictWeightAt(queenSquares, targetQueen->getColumn(), row);
         if (conflictWeight < minConflictWeight) {
             minConflictWeight = conflictWeight;
             minConflictRow = row;
         }
     }
-std::cout << "Move queen at " << targetQueen->getColumn() << " to " << minConflictRow << " from " << originalRow << std::endl;
-    targetQueen->setRow(minConflictRow);
+//std::cout << "Move queen at " << targetQueen->getColumn() << " to " << minConflictRow << " from " << originalRow << std::endl;
+    if (initialRow != minConflictRow) {
+        targetQueen->setRow(minConflictRow);
+        return true;
+    }
+    return false;
+}
+
+queenSquare *getNextQueenThatIsNotMandatory(const std::list<queenSquare *> queenSquares) {
+    while (true) {
+        int index = rand() % queenSquares.size();
+        auto queen = findQueenSquareByIndex(queenSquares, index);
+        if (!queen->isMandatory()) {
+            return queen;
+        }
+    }
 }
 
 bool solveNQueensFor(const std::list<queenSquare *> queenSquares) {
     int squaresPerSide = (int)queenSquares.size();
     int conflictWeight = calculateConflictWeight(queenSquares);
-//    int nextQueenIndex = 0;
+    int lastConflictWeight = -1;
+    int failedIterations = 0;
+    int failsToTriggerReset = squaresPerSide * (int)ceil(sqrt(squaresPerSide));
+    int sequentialNonMovesOfQueen = 0;
+    int numberOfQueensToMoveOnReset = (int)ceil(sqrt(squaresPerSide));
+    int resetsToTriggerStalemate = squaresPerSide * squaresPerSide;
+    int totalResets = 0;
+    bool status = true;
     while (conflictWeight != 0) {
-//std::cout << conflictWeight << std::endl;
-//        int queenIndex = nextQueenIndex++;
-//        nextQueenIndex = nextQueenIndex % squaresPerSide;
-        int queenIndex = rand() % squaresPerSide;
-        auto whichQueen = findQueenSquareByIndex(queenSquares, queenIndex);
-        if (whichQueen->isMandatory() || !isInConflictAt(queenSquares, whichQueen->getColumn(), whichQueen->getRow())) {
+        auto queen = getNextQueenThatIsNotMandatory(queenSquares);
+        if (!isInConflictAt(queenSquares, queen->getColumn(), queen->getRow())) {
             continue;
         }
-        moveQueenToMinConflictPosition(queenSquares, whichQueen, conflictWeight);
-        conflictWeight = calculateConflictWeight(queenSquares);
+        if (moveQueenToMinConflictPosition(queenSquares, queen, conflictWeight)) {
+            conflictWeight = calculateConflictWeight(queenSquares);
+            sequentialNonMovesOfQueen = 0;
+        } else {
+            sequentialNonMovesOfQueen++;
+        }
+
+        // break a stalemate?
+        if (conflictWeight != lastConflictWeight) {
+            lastConflictWeight = conflictWeight;
+            failedIterations = 0;
+        } else {
+            failedIterations++;
+            if (sequentialNonMovesOfQueen > squaresPerSide || failedIterations > failsToTriggerReset) {
+//std::cout << "FAILED" << std::endl;
+                queen->setRow(rand() % squaresPerSide);
+                for (int moves = 0; moves < numberOfQueensToMoveOnReset - 1; moves++) {
+                    getNextQueenThatIsNotMandatory(queenSquares)->setRow(rand() % squaresPerSide);
+                }
+                conflictWeight = calculateConflictWeight(queenSquares);
+
+                failedIterations = 0;
+                sequentialNonMovesOfQueen = 0;
+
+                ++totalResets;
+                if (totalResets > resetsToTriggerStalemate) {
+//std::cout << "STALEMATE" << std::endl;
+                    status = false;
+                    break;
+                }
+            }
+        }
     }
-    // how to detect a non-solvable condition?????
-    return true;
+    return status;
 }
 
 std::string solveNQueens(int n, std::pair<int, int> mandatoryQueenCoordinates) {
@@ -208,6 +256,8 @@ std::string solveNQueens(int n, std::pair<int, int> mandatoryQueenCoordinates) {
     if (n < 4) {
         return "";
     }
+
+    srand(time(NULL));
 
     std::list<queenSquare *> queenSquares;
 

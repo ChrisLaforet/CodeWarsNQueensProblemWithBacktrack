@@ -69,10 +69,10 @@ int main() {
 //    ASSERT_EQ(7, columnCount);
 //}
 
-//TEST(TDDTests, givenBoardSize4WithPlacedQueen_whenSolvingImpossibleProblem_thenReturnsEmptySolutionString) {
-//    auto actual = solveNQueens(4, {1, 1});
-//    ASSERT_EQ("", actual);
-//}
+TEST(TDDTests, givenBoardSize4WithPlacedQueen_whenSolvingImpossibleProblem_thenReturnsEmptySolutionString) {
+    auto actual = solveNQueens(4, {1, 1});
+    ASSERT_EQ("", actual);
+}
 
 TEST(TDDTests, givenBoardSize4WithPlacedQueen_whenSolvingProblem_thenReturnsOnlyPossibleSolutionString) {
     auto actual = solveNQueens(4, {2,0});
@@ -112,7 +112,17 @@ TEST(TDDTests, givenBoardSize28WithPlacedQueen_whenSolvingProblem_thenReturnsSol
     ASSERT_TRUE(returnValue.length() > 0);
 }
 
-//TEST(TDDTests, givenBoardSize32WithPlacedQueen_whenSolvingProblem_thenReturnsSolutionString) {
-//    auto returnValue = solveNQueens(32, {1, 0});
+TEST(TDDTests, givenBoardSize32WithPlacedQueen_whenSolvingProblem_thenReturnsSolutionString) {
+    auto returnValue = solveNQueens(32, {1, 0});
+    ASSERT_TRUE(returnValue.length() > 0);
+}
+
+TEST(TDDTests, givenBoardSize64WithPlacedQueen_whenSolvingProblem_thenReturnsSolutionString) {
+    auto returnValue = solveNQueens(64, {1, 0});
+    ASSERT_TRUE(returnValue.length() > 0);
+}
+
+//TEST(TDDTests, givenBoardSize128WithPlacedQueen_whenSolvingProblem_thenReturnsSolutionString) {
+//    auto returnValue = solveNQueens(128, {1, 0});
 //    ASSERT_TRUE(returnValue.length() > 0);
 //}
