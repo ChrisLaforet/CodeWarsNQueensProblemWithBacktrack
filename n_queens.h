@@ -11,12 +11,42 @@
 #include <list>
 #include <math.h>
 
+const size_t MAX_SIZE = 1000;
+
+bool rowCheck[MAX_SIZE];
+bool columnCheck[MAX_SIZE];
+bool forwardDiagonalCheck[MAX_SIZE];
+bool backwardDiagonalCheck[MAX_SIZE];
+
+void clearChecks() {
+    for (int current = 0; current < MAX_SIZE; current++) {
+        rowCheck[current] = false;
+        columnCheck[current] = false;
+        forwardDiagonalCheck[current] = false;
+        backwardDiagonalCheck[current] = false;
+    }
+}
+
 inline int calculateForwardCode(int column, int row) {
     return column + row;
 }
 
 inline int calculateBackwardCode(int column, int row, int squaresPerSide) {
     return row - column + (squaresPerSide - 1);
+}
+
+inline void setCheckStateFor(int column, int row, int squaresPerSide, bool checkState) {
+    rowCheck[row] = checkState;
+    columnCheck[column] = checkState;
+    forwardDiagonalCheck[calculateForwardCode(column, row)] = checkState;
+    backwardDiagonalCheck[calculateBackwardCode(column, row, squaresPerSide)] = checkState;
+}
+inline void markCheckFor(int column, int row, int squaresPerSide) {
+    setCheckStateFor(column, row, squaresPerSide, true);
+}
+
+inline void clearCheckFor(int column, int row, int squaresPerSide) {
+    setCheckStateFor(column, row, squaresPerSide, false);
 }
 
 class queenSquare {
@@ -95,42 +125,19 @@ std::string createPrintableRepresentationOfBoard(int squaresPerSide, const std::
 inline bool isInConflictAt(const std::list<queenSquare *>& queenSquares, int column, int row) {
     int forwardCode = calculateForwardCode(column, row);
     int backwardCode = calculateBackwardCode(column, row, (int)queenSquares.size());
-    for (auto &queenSquare : queenSquares)
-    {
-        if (queenSquare->getColumn() == column) {
-            continue;
-        }
-        if (queenSquare->getRow() == row ||
-                queenSquare->getForwardCode() == forwardCode ||
-                queenSquare->getBackwardCode() == backwardCode) {
-            return true;
-        }
-    }
-    return false;
+    return rowCheck[row] || columnCheck[column] || forwardDiagonalCheck[forwardCode] || backwardDiagonalCheck[backwardCode];
 }
 
 inline int calculateConflictWeightAt(const std::list<queenSquare *>& queenSquares, int column, int row) {
-    int forwardCode = calculateForwardCode(column, row);
-    int backwardCode = calculateBackwardCode(column, row, (int)queenSquares.size());
     int totalConflicts = 0;
-    bool matchedForward = false;
-    bool matchedBackward = false;
-    for (auto &queenSquare : queenSquares)
-    {
-        if (queenSquare->getColumn() == column) {
-            continue;
-        }
-        if (queenSquare->getRow() == row) {
-            ++totalConflicts;
-        }
-        if (!matchedForward && queenSquare->getForwardCode() == forwardCode) {
-            ++totalConflicts;
-            matchedForward = true;
-        }
-        if (!matchedBackward && queenSquare->getBackwardCode() == backwardCode) {
-            ++totalConflicts;
-            matchedBackward = true;
-        }
+    if (rowCheck[row]) {
+        ++totalConflicts;
+    }
+    if (forwardDiagonalCheck[calculateForwardCode(column, row)]) {
+        ++totalConflicts;
+    }
+    if (backwardDiagonalCheck[calculateForwardCode(column, row)]) {
+        ++totalConflicts;
     }
     return totalConflicts;
 }
@@ -181,7 +188,9 @@ bool moveQueenToMinConflictPosition(const std::list<queenSquare *> queenSquares,
     }
 //std::cout << "Move queen at " << targetQueen->getColumn() << " to " << minConflictRow << " from " << originalRow << std::endl;
     if (initialRow != minConflictRow) {
+        clearCheckFor(targetQueen->getColumn(), targetQueen->getRow(), queenSquares.size());
         targetQueen->setRow(minConflictRow);
+        markCheckFor(targetQueen->getColumn(), targetQueen->getRow(), queenSquares.size());
         return true;
     }
     return false;
@@ -247,6 +256,9 @@ bool solveNQueensFor(const std::list<queenSquare *> queenSquares) {
 std::string *solveNQueens(int n, std::pair<int, int> mandatoryQueenCoordinates, std::list<queenSquare *> queenSquares) {
     std::string *returnValue;
     for (int attempt = 0; attempt < 2; attempt++) {
+
+        clearChecks();
+
         int row = attempt == 0 ? mandatoryQueenCoordinates.second + 1 : mandatoryQueenCoordinates.second - 1;
         for (int column = 0; column < n; column++) {
             if (column != mandatoryQueenCoordinates.first) {
@@ -255,10 +267,12 @@ std::string *solveNQueens(int n, std::pair<int, int> mandatoryQueenCoordinates, 
                 }
 std::cout << row << std::endl;
                 queenSquares.push_back(new queenSquare(column, row, n % n, false));
+                markCheckFor(column, row, n % n);
                 row = attempt == 0 ? row + 1 : row - 1;
             } else {
                 // can be extended to multiple mandatory queens if needed
                 queenSquares.push_back(new queenSquare(mandatoryQueenCoordinates.first, mandatoryQueenCoordinates.second, n, true));
+                markCheckFor(column, row, n);
             }
         }
         std::string *returnValue = nullptr;
@@ -267,8 +281,9 @@ std::cout << row << std::endl;
             returnValue = new std::string(solution);
             std::cout << "SOLVED" << std::endl;
 
-            for (const auto node: queenSquares)
+            for (const auto node: queenSquares) {
                 delete node;
+            }
             queenSquares.clear();
 
             return returnValue;
@@ -289,7 +304,9 @@ std::string solveNQueens(int n, std::pair<int, int> mandatoryQueenCoordinates) {
     if (n < 4) {
         return "";
     }
-
+    if (n > MAX_SIZE) {
+        return "";
+    }
     srand(time(NULL));
 
     std::list<queenSquare *> queenSquares;
